@@ -2,8 +2,6 @@
 layout: default
 ---
 
-# <center>iOS新闻类App内容页技术探索</center>
-
 据相关数据显示，截至2017年底，中国手机新闻客户端用户规模达到6.36亿人，移动App已经成为新闻和内容传播的最重要途径之一。而伴随着行业的竞争和发展，App中的**内容页**在提升App品质、提升使用时长及提升用户黏性等方面，扮演着更为重要的角色，同时也面临着更大的挑战。
 
 1.	**内容页在呈现上越来越丰富。**新闻资讯作为内容页的主体，逐渐增加了更多的文字样式、内容形式、富媒体、以及广告、投票等更为丰富的元素。
@@ -15,6 +13,8 @@ layout: default
 
 本文结合分析目前主流（DAU）新闻类App如`今日头条、腾讯新闻、天天快报、一点资讯等`内容页技术方案的选择，一起探索新闻类App内容页的技术实现和优化。
 
+<br>
+
 > ***
 >_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
 >
@@ -23,6 +23,8 @@ layout: default
 >_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
 >
 >***
+
+<br>
 
 ## 1. 概念定义
 
@@ -193,7 +195,7 @@ layout: default
 	
 -  	更加丰富的状态:
 
-	在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中，为了满足更复杂的需求，如视频预加载及自动播放、Gif预加载及自动播放等，我们扩展了组件在滚动过程中的状态，增加自定义workRange，使组件在滚动过程中的状态变为3种，即None、prepare区域及Visible区域，更加全面准确的记录状态切换，更加灵活的支持业务场景。
+	在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中，为了满足更复杂的需求，如视频预加载及自动播放、Gif预加载及自动播放等，我们扩展了组件在滚动过程中的状态，增加自定义workRange，使组件在滚动过程中的状态变为3种，即None、prepare区域及Visible区域，更加全面准确的记录状态切换，更加灵活的支持业务场景。同时通过3种状态扩展为二级缓存，对View在不同级别的缓存设置不同的策略。
 	
 综上，通过[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)只需将模块对应Model扩展增加协议，滚动视图扩展Delegate，就可实现任何滚动视图中子View的回收复用功能。
 
@@ -221,56 +223,62 @@ layout: default
 
 Native扩展区中的组件不同于WebView中的组件，不依赖WebView自身渲染。所以当动态调整大小时，之需调整全部Native扩展区组件数据Model中保存的Frame信息，同时调整在屏幕中的组件位置即可。
 
+<br>
+
+> ***
+>_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+>_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>
+>***
+
+<br>
 
 ## <center>- 内容页组件化架构 -</center>
 ***
 
-在实现了以上技术关键点的基础上，如何合理的设计内容页通用的架构，快速响应内容页的各种需求调整，使整体架构易扩展、易维护，同时有较高的性能及较小的内存占用，成为了整个内容页架构实现的重点。在**[HybridPageKit](https://github.com/dequan1331/HybridPageKit)**中，我们围绕灵活复用、高内聚低耦合、易于实现扩展三个重点的方向，设计实现了基于组件化的内容页整体架构。
+在实现了以上技术关键点的基础上，如何合理的设计内容页通用的架构，快速响应内容页的各种需求调整，使整体架构易扩展、易维护，同时有较高的性能及较小的内存占用，成为了整个内容页架构实现的重点。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中，我们围绕灵活复用、高内聚低耦合、易于实现扩展三个重点的方向，设计实现了基于组件化的内容页整体架构。
 
 ## 1.	组件化解耦及组件通信
 
+为了满足内容页业务的相对独立，支持快速响应迭代及组件整体复用，内容页整体的结构应满足通用性、易于扩展、以及高内聚低耦合的特点。所以在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)的支持下，采用组件化的方式实现全部内容页业务模块。
+
 ### 1. 组件化解耦
 
-为了达到组件的高内聚、与内容页的低耦合，结合组件的控制逻辑不会特别复杂的背景，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中将每个组件用独立的MVC模式实现。其中Model作为组件的数据，只需要在实现解析逻辑同时，实现对应delegate即可。Controller只需要实现组件间通信的delegate，选择性的实现例如controller生命周期、webview关键回调、以及滚动复用相关的方法即可。通过组件的自管理及复用，组件可以集成统一的上报逻辑、业务逻辑到自己的Controller中，并且在不同类型的页面灵活复用。
+为了达到组件的高内聚、与内容页的低耦合，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中拆分业务逻辑为独立的组件化的处理单元，每个处理单元通过MVC模式实现。其中Model作为组件的数据，只需要在实现解析逻辑同时，实现对应delegate即可。Controller只需要实现组件间通信的delegate，选择性的实现例如controller生命周期、webview关键回调、以及滚动复用相关的方法即可。通过组件的自管理及复用，组件可以集成统一的上报逻辑、业务逻辑到自己的Controller中，并且在不同类型的页面灵活复用。
 
 ### 2. 组件通信
 
-为了更好的实现组件化的结构，组件的Controller需要在内容页初始化时进行注册。内容页在每个关键的生命周期或业务节点，广播执行响应的方法，组件的Controller按需实现处理即可。对于新增、删除功能，只需扩展delegate中的方法，内容页中触发方法、组件中实现方法即可。
+为了更好的实现组件化的结构，组件的Controller需要在内容页初始化时进行注册。内容页在每个关键的生命周期或业务节点，采用中心化通信，广播执行响应的方法，组件的Controller按需实现处理即可。对于新增、删除功能，只需扩展delegate中的方法，内容页中触发方法、组件中实现方法即可。
 
 <center><img width="30%" height="30%" src="./assets/img/componentcomm.png"></center>
 
 
 ## 2.	组件及WebView的复用管理
 
-### 1. WebView全局复用
+### 1. WebView & 组件View全局复用
 
-为了提高WKWebView渲染速度，通过建立全局WKWebView复用回收池来复用WKWebView。除了基本的线程安全、复用状态管理等，在进入回收池前要load特殊Url以维护整个backFowardList。
+为了提高WKWebView渲染速度，通过建立全局WKWebView复用回收池来复用WKWebView。除了基本的线程安全、复用状态管理等，在进入回收池前要load特殊Url以维护整个backFowardList。组件的View也是通过全局的复用回收池进行管理，使得相同的组件View可以灵活的出现在内容页、列表页等App内各个页面，极大的减少了开发成本，提高运行效率。
 
-### 2. 组件View全局复用
-
-组件的View也是通过全局的复用回收池进行管理，使得相同的组件View可以灵活的出现在内容页、列表页等App内各个页面，极大的减少了开发成本，提高运行效率。
-
-### 3. 自动回收 & 内存管理
+### 2. 自动回收 & 内存管理
 
 WebView及组件View实现自动回收逻辑，每次在申请新View时检测活动队列中View的SuperView是否为nil，是则自动回收防止内存泄露，同时增加View最大数量阈值、内存告警自动释放逻辑等。
 
-## 3.	业务逻辑及内容页类型易于扩展
+## 3.	内容页整体架构
 
-### 1. 易于扩展业务节点
+### 1. 易于扩展业务节点 & 组件类型
 
-对于增加关键的业务节点用于组件业务处理，我们只需扩展delegate中的方法，在相关组件中实现。内容页Controller中在相应位置，通过统一函数触发广播代理方法即可。
+对于增加关键的业务节点用于组件业务处理，我们只需扩展delegate中的方法，在相关组件中实现。内容页Controller中在相应位置，通过统一函数触发广播代理方法即可。对于增加组件来说，只需创建组件完全独立的MVC代码，实现数据解析Model并实现滚动复用delegate，在组件Controller中实现delegate中需要的方法等待调用，以及初始化时在内容页注册即可。删除组件完全无需操作内容页，删除独立的MVC结构并停止注册即可。
 
-### 2. 易于扩展组件类型
-
-对于增加组件来说，只需创建组件完全独立的MVC代码，实现数据解析Model并实现滚动复用delegate，在组件Controller中实现delegate中需要的方法等待调用，以及初始化时在内容页注册即可。删除组件完全无需操作内容页，删除独立的MVC结构并停止注册即可。
-	
-### 3. 易于扩展内容页类型
+### 2. 易于扩展内容页类型
 
 为了实现内容页扩展区的灵活复用，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中也扩展了非WebView类型的内容页。就像文中之前提到的，如果将WebView看做一个整体作为一个组件，基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)的位置动态管理，完全可以替换成普通的View（类似Banner视频内容页），或者可扩展收起的View（问题回答页面）甚至tableView等。所以整个App内各种类型的内容页只需要简单的配置，便可进行实现和组件复用。
 
 <center><img width="30%" height="30%" src="./assets/img/pagetype.png"></center>
 
-## 4.	内容页整体架构
+### 3. 内容页架构
 
 结合[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)以及组件化的设计思路，[HybridPageKit](https://github.com/dequan1331/HybridPageKit)整体的架构如下：
 
@@ -278,70 +286,138 @@ WebView及组件View实现自动回收逻辑，每次在申请新View时检测�
 
 通过继承特殊的内容页Controller并进行简单的配置，即可生成不同类型的内容页整体架构。框架内集成基本的Mustache解析和渲染。结合后台数据，只需实现对应页面中组件MVC逻辑即可。其中Model只需继承对应Protocol，Controller在内容页中注册，继承对应Protocol即可。
 
+<br>
 
-## 首屏加载速度优化
-
-1.	在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中的技术方案以及架构设计，已经包含了许多对首屏加载速度的优化实现。
-
-1.	WKWebView的复用极大的缩短了内容页从创建到渲染结束的时间，组件的滚动复用提升了滚动的性能，减少了多图、多富媒体内容页内存的占用，组件全局的复用减少了浏览多篇文章时相同组件的重复初始化时间等。
-2. WebView中非文字类UI Native化，极大的缩短了业务流程，减少了进程间通信，提高了类似图片类的UI展示速度。
-3.	组件的解耦与自管理，以及广播delegate的实现，为组件的按需加载、按优先级加载提供了基础。对于内容页的各个组件来说，在内容页展示之前大部分是不需要初始化、数据拉取以及渲染的。组件化之后的组件可以根据业务优先级，在不同的关键生命周期回调中实现业务逻辑，以减轻内容页创建、模板拼接以及WebView渲染的压力。简单的举例，由于内容WebView几乎都大于一屏，扩展区中的全部组件都可以在WebView渲染结束后进行View创建、网络拉取和渲染等，这样即不影响用户的使用，同时极大的释放了渲染结束前的网络、XPC及CPU压力，提高首屏展示速度。
-
-3. 脱离[HybridPageKit](https://github.com/dequan1331/HybridPageKit)，在基于业务的实际运用上，还有很多关键的优化方法和思路，这里也一并讨论下：
-	
-	1.	**文章内容预拉取。**对于内容页关键内容（Webview）的拉取，大部分App都放到了列表页中进行。进入内容页时直接从Cache中取出内容模板，直接交给WebView渲染。
-	2.	**图片预拉取。**对于简单的按需加载图片实现来说，是否能避免Loading的关键，在于滚动阈值的选择。可以在列表优先拉取文章前几张图片，或增大按需加载的Offset阈值。
-	3. **利用浏览器缓存。**对于内容WebView中必要的CSS以及JS，以及必要的基础Icon，可以通过设置response的失效时间，依靠浏览器自身缓存提高效率。同时应该有相应的md5校验以保证刷新资源。
-	4. **通用优化。**在以上有针对的性的优化同时，也要保持通用性的优化方法。比如异步拉取、异步处理数据、资源缓存等。
-	
-## 拾遗及Tips
-
-1. 模板引擎的选择。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)我们使用了Mustache的模板引擎，主要由于它的轻量、继承的方便以及************
-2. 针对服务于活动、运营的临时H5页面，自定义JSApi注入、JSBridge的选择等，除去技术上的问题，通过后台下发黑白名单，客户端通过domain选择性注入JS，以及相关的安全性考虑也是整个实现中重要的一环。
-3. 对于底层页图片的管理，绝大多数App都将之纳入了App统一的图片管理体系中。无论使用哪个开源图片库，在缓存策略上，尽量将底层页图片的缓存策略与其他的有所区分，或者使用LRU + FIFO的缓存策略，避免进入底层页大量图片占用缓存空间，导致列表图片释放。同时从使用的角度来说，重复进入同一篇文章的场景也不会频繁的出现。
-
--
->**插播广告 —— 几十行代码完成新闻类App多种形式内容页** 
->
->[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。
->
->基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。
-
--
-
-优势
-1.	快，内存下
-2. 支持复杂UI，动态更新
-3. 易扩展，分为内容页扩展和组件的扩展
-4. 易继承
-5. 各个内容页也画一张图
-
-把按需粘贴的逻辑也加进来
-
-
-
-
->***
->**插播广告 —— WKWebView扩展** 
->
->[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)：解决若干WkWebView的bug或不便，如自定义长按MenuItems（iOS11以下）、支持URLProtocol、扩展Delegate、clear cache（iOS8）等等。
->
 > ***
+>_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+>_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>
+>***
+
+<br>
 
 
--
+## <center>- 首屏加载速度优化 -</center>
+***
+
+新闻类App内容页，在Native的页面框架下，基于WebView进行加载和渲染。所以，从优化的角度就延伸出两个维度，即从Web的维度优化，以及从Native的维度优化。
+
+### 1. Web维度的优化
+
+-	WKWebView的复用 : 
+
+	通过WKWebView的复用，极大的缩短了WebView从创建到渲染结束的时间。
 	
->**插播广告 —— 无需继承的滚动复用组件** 
->
->[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) ：在无需继承特殊ScrollView的前提下，实现滚动视图中SubViews的滚动复用回收组件。
+- 	利用HTTP缓存 : 
+
+	对于内容WebView中必要的CSS以及JS，以及必要的基础Icon，可以通过设置HTTP缓存，依靠浏览器自身缓存提高效率。同时通过资源md5校验以保证刷新资源。
 	
--
+-  减少资源请求并发 : 
 
--
->**插播广告 —— 几十行代码完成新闻类App多种形式内容页** 
->
->[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。
->
->基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。
+	通过Native化全部非文字类的内容，Web页面只加载最近本的Html内容，减少了业务逻辑的资源请求和并发。
+	
+- 	减少Dom & Javascript复杂度 : 
 
--
+	通过Native化全部非文字类的内容，极大的减少了Dom的复杂度、CSS的复杂度以及过多的JS业务逻辑。
+	
+-  其它Web优化通用方法 : 
+
+	精简Javascript，使用iconFont，CSS & Javascript文件压缩等
+
+### 2. Native维度的优化
+
+-	数据模板分离，资源并行加载 :
+
+	基于后台数据以及Native化组件，内容页Html中模板与数据分离，使得全部资源如图片视频等都可以通过Native在合适的时机异步并行加载。不依赖与Web的渲染。
+
+-  预加载数据,延迟加载组件:
+
+	对于内容页关键内容（Webview）的拉取，大部分App都放到了列表页中进行。进入内容页时直接从Cache中取出内容模板，直接交给WebView渲染。基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)扩展丰富的状态及二级缓存，在页面滚动的过程中各个组件也可以精确的实现按需加载、预加载等逻辑。
+
+-	Native化非文字UI，及组件化实现负载均衡 :
+
+	WebView中非文字类UI Native化，极大的缩短了展示所需的流程，减少了进程间通信，减少了I/O及图片编解码逻辑，提高了类似图片类的UI展示速度。
+	
+	组件的解耦与自管理，以及广播delegate的实现，为组件的按需加载、按优先级加载提供了基础。对于内容页的各个组件来说，在内容页展示之前大部分是不需要初始化、数据拉取以及渲染的。组件化之后的组件可以根据业务优先级，在不同的关键生命周期回调中实现业务逻辑，以减轻内容页创建、模板拼接以及WebView渲染的压力。简单的举例，由于内容WebView几乎都大于一屏，扩展区中的全部组件都可以在WebView渲染结束后进行View创建、网络拉取和渲染等，这样即不影响用户的使用，同时极大的释放了渲染结束前的网络、XPC及CPU压力，提高首屏展示速度。
+
+- 	组件的滚动复用 & 全局复用 & Model缓存Frame:
+
+	基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)扩展数据Model，缓存对应View的Frame信息，结合View的滚动复用，极大的减少了UI布局的逻辑和计算。页面内组件的滚动复用及页面间的组件复用，也同时减少了组件View的初始化耗时。
+
+-	其它通用方法:
+
+	基于App的技术实现和业务逻辑的优化，如异步执行业务逻辑、 图片编解码优化及资源缓存，DNS缓存等。
+
+### 3. 整体优化方法
+
+综上，从一个内容页在列表上的点击，到WebView渲染结束，最后到用户的滚动操作，按照时间的顺序，全部的优化策略如下图：
+
+
+1.	初始化及数据接收
+	1.	预加载、并行加载数据
+	2. 减少初始化View创建逻辑
+	3. 异步构建、渲染Html
+
+2.	WebView页面渲染
+	1.	替换WKWebView
+	2. WebView复用
+	3. Web资源缓存
+	4. 优化图片逻辑加载
+3.	渲染完成到展示
+	1.	组件按需加载
+	2. 组件按优先级执行
+	3. 白屏容错
+4.	页面展示
+	1.	图片Native化
+	2. 通用组件回收方案
+
+
+<br>
+
+> ***
+>_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+>_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>
+>***
+
+<br>
+
+## <center>- 拾遗及Tips -</center>
+***
+
+对于新闻类App内容页的完整的解决方案，还有一些基本的技术点，比如模板引擎及模板拼接的模块、JSApi注入及管理的模块等等，由于篇幅所限，暂且不做深入的展开。
+
+-	新闻类App的内容页，除去基本的渲染HTML数据外，同时也需要支持服务于活动、运营的临时H5页面。这些页面为了和Native进行交互，在自定义JSApi注入、JSBridge的选择、后台下发domain黑白名单、以及相关的安全性考虑也是整个实现中重要的一环。同时由于WKWebView支持复用回收，加载本地Html类型的WebView应该与加载H5的WebView在不同的回收复用池分开管理。
+
+-	对于底层页图片的管理，绝大多数App都将之纳入了App统一的图片管理体系中。无论使用哪个开源图片库，在缓存策略上，尽量将底层页图片的缓存策略与其他的有所区分，或者使用`LRU + FIFO`的缓存策略，避免进入底层页大量图片占用缓存空间，导致列表图片释放。同时从使用的角度来说，重复进入同一篇文章的场景也不会频繁的出现。
+
+-	由于各个App的数据接口和技术选型不同，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中只简单的实现了基于Mustache的模板拼接，主要是由于它的logic-less、多终端集成的方便以及开源社区的活跃。对于这部分逻辑，需要根据后台数据的格式及业务需求自定义的扩展。
+
+
+内容页整体的实现和优化，依赖整个App的技术实现和结构，在实现和优化的过程中，还有许多权衡和妥协，以及许多通用的、细节的优化，这里就不一一赘述。
+
+<br>
+
+## <center>- 写在最后 -</center>
+***
+
+文章全部的探索及分析的实现，除对应业务逻辑外，应用封装成三个框架：[HybridPageKit](https://github.com/dequan1331/HybridPageKit)、[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)以及[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)。最终可以通过几十行代码，完成新闻类App多种形式的、高性能、易扩展、组件化的内容页实现。
+
+有任何疑问，欢迎提交 issue， 或者直接修改提交 PR!
+
+<br>
+
+> ***
+>_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+>_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>
+>***
