@@ -39,7 +39,7 @@ layout: default
 
 ## 2. 目录
 
-<center><img width="80%" height="80%" src="./assets/img/index.png"></center>
+<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/index.png"></center>
 
 ## <center>- 技术方案选择 -</center>
 ***
@@ -91,7 +91,7 @@ layout: default
 
 ### 1. 结合TableView
 
-<center><img width="50%" height="50%" src="./assets/img/tableView.png"></center>
+<center><img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/tableView.png"></center>
 	
 -	实现原理:
 
@@ -109,7 +109,7 @@ layout: default
 
 ### 2. ScrollView嵌套
 
-<center><img width="70%" height="70%" src="./assets/img/Scroll.png"></center>
+<center><img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/Scroll.png"></center>
 
 -	实现原理:
 
@@ -144,7 +144,7 @@ layout: default
 
 为了减少实现复杂UI、复杂交互模块的开发、维护成本、减少模块在Web和Native间的逻辑流程，提高Web中模块的加载展示速度，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中将Web中全部非文字类模块全部Native化。
 	
-<center><img width="70%" height="70%" src="./assets/img/div.png"></center>
+<center><img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/div.png"></center>
 
 -	页面模板使用空div占位:
 
@@ -181,7 +181,7 @@ layout: default
 
 ### 2. WebView中组件的滚动复用
 
-<center><img width="60%" height="60%" src="./assets/img/scrollData.png"></center>
+<center><img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/scrollData.png"></center>
 
 -	无需继承:
 
@@ -205,7 +205,7 @@ layout: default
 
 在解决了内容WebView中非文字类组件的Native化、滚动复用之后，我们将实现思想运用到包含Native扩展区的，内容页整体架构中。如果从内容页的维度去看，内容WebView也可以算作一个组件，它和扩展区的各种组件一起作为Container的子View，也可以运用上面提到的[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)进行实现和管理。
 	
-<center><img width="30%" height="30%" src="./assets/img/rns2.png"></center>
+<center><img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/Rns2.png"></center>
 
 所以整个内容页就是从两个维度、运用[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中的实现方法两次实现滚动复用回收、数据驱动、组件自管理以及组件状态切换逻辑。
 	
@@ -255,7 +255,7 @@ Native扩展区中的组件不同于WebView中的组件，不依赖WebView自身
 
 为了更好的实现组件化的结构，组件的Controller需要在内容页初始化时进行注册。内容页在每个关键的生命周期或业务节点，采用中心化通信，广播执行响应的方法，组件的Controller按需实现处理即可。对于新增、删除功能，只需扩展delegate中的方法，内容页中触发方法、组件中实现方法即可。
 
-<center><img width="60%" height="60%" src="./assets/img/componentcomm.png"></center>
+<center><img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/componentComm.png"></center>
 
 
 ## 2.	组件及WebView的复用管理
@@ -278,13 +278,13 @@ WebView及组件View实现自动回收逻辑，每次在申请新View时检测�
 
 为了实现内容页扩展区的灵活复用，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中也扩展了非WebView类型的内容页。就像文中之前提到的，如果将WebView看做一个整体作为一个组件，基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)的位置动态管理，完全可以替换成普通的View（类似Banner视频内容页），或者可扩展收起的View（问题回答页面）甚至tableView等。所以整个App内各种类型的内容页只需要简单的配置，便可进行实现和组件复用。
 
-<center><img width="80%" height="80%" src="./assets/img/pagetype.png"></center>
+<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/pageType.png"></center>
 
 ### 3. 内容页架构
 
 结合[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)以及组件化的设计思路，[HybridPageKit](https://github.com/dequan1331/HybridPageKit)整体的架构如下：
 
-<center><img width="70%" height="70%" src="./assets/img/hybrid.png"></center>
+<center><img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/hybrid.png"></center>
 
 通过继承特殊的内容页Controller并进行简单的配置，即可生成不同类型的内容页整体架构。框架内集成基本的Mustache解析和渲染。结合后台数据，只需实现对应页面中组件MVC逻辑即可。其中Model只需继承对应Protocol，Controller在内容页中注册，继承对应Protocol即可。
 
@@ -345,7 +345,7 @@ WebView及组件View实现自动回收逻辑，每次在申请新View时检测�
 	
 	组件的解耦与自管理，以及广播delegate的实现，为组件的按需加载、按优先级加载提供了基础。对于内容页的各个组件来说，在内容页展示之前大部分是不需要初始化、数据拉取以及渲染的。组件化之后的组件可以根据业务优先级，在不同的关键生命周期回调中实现业务逻辑，以减轻内容页创建、模板拼接以及WebView渲染的压力。简单的举例，由于内容WebView几乎都大于一屏，扩展区中的全部组件都可以在WebView渲染结束后进行View创建、网络拉取和渲染等，这样即不影响用户的使用，同时极大的释放了渲染结束前的网络、XPC及CPU压力，提高首屏展示速度。
 	
-	<center><img width="80%" height="80%" src="./assets/img/need.png"></center>
+	<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/need.png"></center>
 <br>
 - 	组件的滚动复用 & 全局复用 & Model缓存Frame:
 
@@ -359,7 +359,7 @@ WebView及组件View实现自动回收逻辑，每次在申请新View时检测�
 
 综上，从一个内容页在列表上的点击，到WebView渲染结束，最后到用户的滚动操作，按照时间的顺序，全部的优化策略如下图：
 
-<center><img width="90%" height="90%" src="./assets/img/opt.png"></center>
+<center><img width="90%" height="90%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/opt.png"></center>
 
 
 <br>
