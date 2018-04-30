@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: HybridPageKit-EN
 ---
 
 Shown by relevant data by the end of 2017, China's mobile phone news App scale has reached 636 million people, and mobile App has become one of the most important ways of news and content dissemination. With the competition and development of the industry, the **content page in App** plays a more important role in improving the quality of App, enhancing the Time on App and increasing the viscosity of the user. Meanwhile, it also faces more challenges.
@@ -17,11 +17,11 @@ Based on the analysis of the current news App content page technology options, s
 <br>
 
 > ***
->_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>_View on GitHub : **Easy integration framework for Content pages of News App**_ 
 >
->_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：A high-performance、high-extensibility、easy integration framework for Hybrid content page. Support most content page types of News App._
 >
->_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>_Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、and the details metioned in this article。_
 >
 >***
 
@@ -39,7 +39,7 @@ As a whole, the right page of the entire content page is generally the comment p
 
 ## 2. Contents
 
-<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/index.png"></center>
+<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/index-en.png"></center>
 
 ## <center>- Technical solutions -</center>
 ***
@@ -142,12 +142,11 @@ As the WebView content areas gradually support complex presentation, simple H5 b
 
 ### 3. Native all components without Text
 
-为了减少实现复杂UI、复杂交互模块的开发、维护成本、减少模块在Web和Native间的逻辑流程，提高Web中模块的加载展示速度，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中将Web中全部非文字类模块全部Native化。
+To reduce the cost of development and maintenance of complex UI and complex interaction module, reduce the logic between Web and Native module communication, improve the module display speed in Web. [HybridPageKit](https://github.com/dequan1331/HybridPageKit) change all non-Text components to Native.
 	
 <center><img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/div.png"></center>
 
--	The page template uses the empty div occupancy
-:
+-	The page template uses the empty div occupancy:
 
 	Combined with the template and data from server, all the non Text class components in templates are mapped to the unified Class Div, which is combined with many unique ID data binding. For synchronous data, the Size of the component is set at the same time, and the asynchronous data is set to 0 first. The template is rendered by WebView after replacement. 
 
@@ -156,15 +155,15 @@ As the WebView content areas gradually support complex presentation, simple H5 b
 	When webView render successfully callback, it then gets all specificy Div class frame and Id by JS.
 -	Add NativeView with frame:
 
-	在进行以上两个步骤的同时，进行下载图片数据、NativeView创建、初始化、异步数据拉取等工作。在JS回调全部位置时，根据位置及ID，粘贴Native组件。
+	At the same time, it will async download image data, create adn init Native view, asynchronous data fetching and so on. When JS returns all the frames, add the Native component to scrollview by frame and ID.
 
--	调整字体大小，组件异步数据拉取：对于异步的变化，在复用逻辑之后，下文将结合一并说明。
+-	Change the font size & asynchronous request for component data:It will be explained in followings.
 
 
 	 
-## 4. 内容页全部组件的滚动复用
+## 4. Reuse of all components when scrolling
 
-在Native化全部非文字类组件之后，面对文章中图片、富媒体数量的增多，以及Native扩展区元素的增加，没有复用回收的内容页从滚动性能及内存两个两个方面都面临着挑战。同时，为了更好的提升用户体验，需要对各个组件滚动时的位置进行计算，从而区分不同的区域进行诸如预处理、延迟释放等逻辑。
+After change all non-Text components to Native, the number of pictures, rich media and the components in Native extension area are increased, the content page without components reuse is facing challenges from two aspects: scroll performance and App memory. At the same time, in order to improve the user experience, it is necessary to calculate the position of each component when scrolling, so as to distinguish different regions, such as prepare, delay release and other logics. 
 
 ### 1. Mainstream scrolling reuse framework
 
@@ -174,180 +173,183 @@ As the WebView content areas gradually support complex presentation, simple H5 b
 
 -	Inherit special Model:
 
-	由于滚动复用需要保存View对应的数据信息，大部分开源框架需要继承特殊数据Model，生成对应必要的参数或方法，对于支持多种类型组件的通用框架来说，继承的实现方式不易于扩展和维护。
 	
--	View滚动状态简单:
+	Because the scrolling reuse needs to save the data information of View, most open source frameworks need to inherit special data Model to generate the necessary parameters or methods. For a high-extensibility framework supporting many types of components, the implementation method of inheritance is not easy to extend and maintain.
+	
+-	Less scrolling state:
 
-	滚动时位置的计算，最简单的方式就是根据屏幕的高度计算是否进入屏幕，对于预加载的需求，绝大部分开源框架也是只是在屏幕区域的上下增加了Buffer，仍然不能区分具体的状态，如进入buffer、进入屏幕等，无法满足复杂的业务逻辑。
+	The simplest way to calculate the position of the scrolling time is to calculate whether or not the component is on the screen. For the preloading requirements, most open source frameworks also add buffer to the screen area, and still cannot distinguish the specific state, such as entering the buffer, entering the screen, leaving the screen or buffer and so on, which cannot satisfy the complexity business logic.
 
-### 2. WebView中组件的滚动复用
+### 2. Reuse of components in WebView when scrolling
 
 <center><img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/scrollData.png"></center>
 
--	无需继承:
+-	No need to inherit:
 
-	在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中，为了兼容WebView、ScrollView等一切滚动视图中子View的复用回收，我们通过scrollView delegate的扩展分发，扩展handler单独处理子View的复用回收，这样就在无需继承的前提下，支持所有滚动视图中子View的复用回收。
+	In order to support subviews reuse logic on all types of scrollview, such as WebView, ScrollView, and so on, [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) extend the scrollView delegate to a dispatcher and extend a handler separately to handle the subViews reuse, so that the reuse and recovery of all the subviews when scrolling can be supported without inheritance.
 
--	数据驱动:
+-	Data driven:
 	
-	由于View需要不断的复用回收，所以数据、状态、位置、对应的View类型都存储在对应的Model中，不但实现了数据驱动易于动态扩展，同时优化了复用的逻辑，也缓存住了Frame等关键信息优化了渲染布局逻辑。
+	Because View needs to reuse and recycle, the data、state、frame and corresponding View types are stored in the model, which not only easy to expand, but also optimizes the logic of reuse, and also caches the key information such as frame to optimize the rendering layout logic.
 	
--  	面向协议:
+-  	Protocol Oriented Programming:
 
-	由于滚动复用的模块对应的View及数据Model种类众多，在不动态扩展NSObject、UIView的情况下，无法做到通用的逻辑公用。所以为了更好的支持扩展、更灵活的实现方式，[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中面向通过扩展数据Protocol，使得任何Model轻松实现复用回收对应逻辑。
+	As the types of view and Model to scrolling reuse are numerous, the general logic cannot be achieved without dynamic expansion of NSObject and UIView. So in order to better support extensions and more flexible implementations, [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) use POP, easy for any Model to reuse and extend by add protocol.
+		
+-  	More scrolling state:
+
+	In order to support more complex needs, such as video preloading & auto play, Gif preloading & auto play, [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) extend the state of the component during the scrolling process, increase the custom workRange, and make the state of the component in the scrolling process to 3 regions: None, prepare region and Visible region, for more comprehensive and accurate compute state switching, more flexible support for business scenarios. At the same time, it expands to two level caching through 3 states, and sets up different strategies for View at different levels of caching.
 	
--  	更加丰富的状态:
+In summary, in [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview), only need to add protocol to model, and dispatch the scrollview delegate, so that it can realize the recovery and reuse function of any scroll view View.
 
-	在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中，为了满足更复杂的需求，如视频预加载及自动播放、Gif预加载及自动播放等，我们扩展了组件在滚动过程中的状态，增加自定义workRange，使组件在滚动过程中的状态变为3种，即None、prepare区域及Visible区域，更加全面准确的记录状态切换，更加灵活的支持业务场景。同时通过3种状态扩展为二级缓存，对View在不同级别的缓存设置不同的策略。
-	
-综上，通过[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)只需将模块对应Model扩展增加协议，滚动视图扩展Delegate，就可实现任何滚动视图中子View的回收复用功能。
+### 3. Reuse all components in content page when scrolling
 
-### 3. 内容页中全部组件的滚动复用
-
-在解决了内容WebView中非文字类组件的Native化、滚动复用之后，我们将实现思想运用到包含Native扩展区的，内容页整体架构中。如果从内容页的维度去看，内容WebView也可以算作一个组件，它和扩展区的各种组件一起作为Container的子View，也可以运用上面提到的[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)进行实现和管理。
+After changing all non-Text component native, and solving the reuse problem in  WebView, we apply the implementation to the overall architecture of the content page, which includes the Native extension area. If looking at the dimension of the content page, the content WebView can be used as a component. It is a sub View of Container with the various components of the extended area, and can also be implemented and managed with the above mentioned [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview).
 	
 <center><img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/Rns2.png"></center>
 
-所以整个内容页就是从两个维度、运用[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)中的实现方法两次实现滚动复用回收、数据驱动、组件自管理以及组件状态切换逻辑。
+So the whole content page is the two realization by [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) of scrolling reuse, data drive, component self management and component state switching from two dimensions. 
 	
-## 5.	组件异步拉取与动态调整
+## 5.	Asynchronous fetching and dynamic adjustment of components
 
-面对复杂的需求、以及按需加载、异步拉取等优化体验的策略，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中也针对响应的场景做了高效的处理。
+Faced with complex needs, on-demand loading, asynchronous fetch and other optimization strategy, [HybridPageKit](https://github.com/dequan1331/HybridPageKit) also optimize for special scene. 
 
-### 1. WebView字体大小调整
+### 1. Font size change in WebView
 
-当WebView中字体大小调整时，需要同时调整全部Native组件的位置。我们监听WebView的ContenSize变化，当变化发生时，重新执行获取组件位置的JS语句获得全部组件的新位置。基于滚动复用的逻辑，只需要对在屏幕中的组件View的位置进行调整，其余只需要重新对组件对应Model的Frame进行赋值，极大提升了效率。在此基础上，要动态的检测ContenSize是否小于屏幕高度，高度小于一屏幕时，要同时调整Native扩展区组件的位置。
+When changing the font size in WebView, all Native components need to be adjusted at the same time. We observer the contenSize change of WebView, and when the change occurs, it will re execute a JS that gets the new frames of all components. Based on scrolling reuse,it requires only the adjustment of the in screen components frame, and the rest only needs to be assigned to the Frame of the component corresponding to the Model, which greatly improves the efficiency. On this basis, it is necessary to dynamically detect whether the webview contenSize is smaller than the screen height, and when the height is less than one screen, the frame of webview and Native extension component should be adjusted at the same time.
 
-### 2. WebView中组件异步拉取数据渲染
+### 2. Async fetch component data in WebView
 
-对于异步拉取数据的组件，由于初始化时占位Div的高度为0，当数据获取成功，并渲染好组件后，需要首先执行JS动态修改对应占位Div的大小，之后按照以上的逻辑，重新赋值Native组件位置。
+For the component that fetch data asynchronously, because the height of the occupying Div is 0 at initialization, when the data is obtained and the component view is rendered, the JS dynamic modification needs to be first executed for the size of the occupying Div, and then the Native component frame shall be reassigned according to the above logic.
 
-### 3. Native扩展区组件异步拉取数据渲染
+### 3. Async fetch component data in native extension area
 
-Native扩展区中的组件不同于WebView中的组件，不依赖WebView自身渲染。所以当动态调整大小时，之需调整全部Native扩展区组件数据Model中保存的Frame信息，同时调整在屏幕中的组件位置即可。
+The components in Native extension area are different from the components in WebView and do not rely on WebView rendering. So when the dynamic adjustment is occurs, it is just to change the frame stored in the Model and change the frame of the component in the screen.
 
 <br>
 
 > ***
->_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>_View on GitHub : **Easy integration framework for Content pages of News App**_ 
 >
->_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：A high-performance、high-extensibility、easy integration framework for Hybrid content page. Support most content page types of News App._
 >
->_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>_Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、and the details metioned in this article。_
 >
 >***
 
 <br>
 
-## <center>- 内容页组件化架构 -</center>
+## <center>- Architecture of Content Page -</center>
 ***
 
-在实现了以上技术关键点的基础上，如何合理的设计内容页通用的架构，快速响应内容页的各种需求调整，使整体架构易扩展、易维护，同时有较高的性能及较小的内存占用，成为了整个内容页架构实现的重点。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中，我们围绕灵活复用、高内聚低耦合、易于实现扩展三个重点的方向，设计实现了基于组件化的内容页整体架构。
+On the basis of the key points above, how to design a general architecture、quickly respond to various requirements、 easy to expand、 easy to maintain, and have high performance and small memory becomes the key to the realization of the whole content page architecture. [HybridPageKit](https://github.com/dequan1331/HybridPageKit) focus on the three key directions of flexible reuse、 high cohesion、 low coupling and easy implementation, and design and implement a component-based content page architecture.
 
-## 1.	组件化解耦及组件通信
+## 1.	Component decoupling and communication
 
-为了满足内容页业务的相对独立，支持快速响应迭代及组件整体复用，内容页整体的结构应满足通用性、易于扩展、以及高内聚低耦合的特点。所以在[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)的支持下，采用组件化的方式实现全部内容页业务模块。
+In order to meet the relative independence of the content page, support fast response iteration and component reuse, the overall structure of the content page should meet the characteristics of generality, easy extension, and high cohesion and low coupling, base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview), use component-based solution to implement all content page business modules.
 
-### 1. 组件化解耦
+### 1. Component-based decoupling
 
-为了达到组件的高内聚、与内容页的低耦合，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中拆分业务逻辑为独立的组件化的处理单元，每个处理单元通过MVC模式实现。其中Model作为组件的数据，只需要在实现解析逻辑同时，实现对应delegate即可。Controller只需要实现组件间通信的delegate，选择性的实现例如controller生命周期、webview关键回调、以及滚动复用相关的方法即可。通过组件的自管理及复用，组件可以集成统一的上报逻辑、业务逻辑到自己的Controller中，并且在不同类型的页面灵活复用。
+In order to achieve the high cohesion of the component and low coupling with the content page, [HybridPageKit](https://github.com/dequan1331/HybridPageKit) split business logic is an independent component processing unit, and each processing unit is implemented through the MVC mode. Model as component data only needs to implement parsing logic and implement delegate. Controller only needs to implement delegate for inter component communications, and selective implementations such as the controller lifecycle, the WebView key callback, and the scrolling reuse related methods. Through self - management and reuse of components, components can integrate unified reporting logic, business logic into their own Controller, and be reused flexibly on different types of pages. 
 
-### 2. 组件通信
+### 2. Component communication
 
-为了更好的实现组件化的结构，组件的Controller需要在内容页初始化时进行注册。内容页在每个关键的生命周期或业务节点，采用中心化通信，广播执行响应的方法，组件的Controller按需实现处理即可。对于新增、删除功能，只需扩展delegate中的方法，内容页中触发方法、组件中实现方法即可。
+To better implement the component-based structure, the Controller of the component needs to be registered when the content page initializes. In each key life cycle or business event, the content page adopts the centralization communication, broadcasting the method, and the delegate methods is implemented on demand in component Controller.  For new or deleted functions, we only need to expand the methods in delegate, trigger methods in content pages, and implement methods in components.
 
 <center><img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/componentComm.png"></center>
 
 
-## 2.	组件及WebView的复用管理
+## 2.	Reuse management of components and WebView
 
-### 1. WebView & 组件View全局复用
+### 1. Reuse of components and WebView
 
-为了提高WKWebView渲染速度，通过建立全局WKWebView复用回收池来复用WKWebView。除了基本的线程安全、复用状态管理等，在进入回收池前要load特殊Url以维护整个backFowardList。组件的View也是通过全局的复用回收池进行管理，使得相同的组件View可以灵活的出现在内容页、列表页等App内各个页面，极大的减少了开发成本，提高运行效率。
+In order to improve the rendering speed of WKWebView, a global WKWebView reuse recovery pool is used to reuse WKWebView. In addition to basic thread safety and reuse state management, loading of special Url is needed before entering the recovery pool to maintain the webview backFowardList. The View of the component is also managed through a global reuse pool, so that the same component View can be flexibly appeared in the pages of the content page, list page and other App pages, which can greatly reduce the cost of development and improve the efficiency of operation.
 
-### 2. 自动回收 & 内存管理
+### 2. Automatic recovery & memory management
 
-WebView及组件View实现自动回收逻辑，每次在申请新View时检测活动队列中View的SuperView是否为nil，是则自动回收防止内存泄露，同时增加View最大数量阈值、内存告警自动释放逻辑等。
+WebView and component View implement automatic recovery logic. Each time dequeue for a new View, detect whether all components superView is nil. It is automatically recovered to prevent memory leak, and support the maximum number of View thresholds and memory warning automatic release logic.
 
-## 3.	内容页整体架构
+## 3.	Architecture of Content page
 
-### 1. 易于扩展业务节点 & 组件类型
+### 1. High-extensibility components
 
-对于增加关键的业务节点用于组件业务处理，我们只需扩展delegate中的方法，在相关组件中实现。内容页Controller中在相应位置，通过统一函数触发广播代理方法即可。对于增加组件来说，只需创建组件完全独立的MVC代码，实现数据解析Model并实现滚动复用delegate，在组件Controller中实现delegate中需要的方法等待调用，以及初始化时在内容页注册即可。删除组件完全无需操作内容页，删除独立的MVC结构并停止注册即可。
+To increase the number of key business event for component, we only need to extend the methods in delegate and implement them in related components.At the content page Controller, the broadcast agent method can be triggered by a unified function. For adding components, it is only necessary to create a fully independent MVC code for components, so as to implement data parsing Model and implement scrolling reuse delegate, to implement the methods needed in delegate in component Controller, and to register in the content page when initialization. Deleting components completely does not need to concern content pages, only to delete independent MVC structures and stop registering.
 
-### 2. 易于扩展内容页类型
+### 2. High-extensibility Content Page
 
-为了实现内容页扩展区的灵活复用，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中也扩展了非WebView类型的内容页。就像文中之前提到的，如果将WebView看做一个整体作为一个组件，基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)的位置动态管理，完全可以替换成普通的View（类似Banner视频内容页），或者可扩展收起的View（问题回答页面）甚至tableView等。所以整个App内各种类型的内容页只需要简单的配置，便可进行实现和组件复用。
+In order to realize the flexible reuse of native extension area, in [HybridPageKit](https://github.com/dequan1331/HybridPageKit), the non WebView type content page is expanded. As mentioned earlier in the article, if WebView is regarded as a component, based on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview), it can be completely replaced by a common View (similar to a Banner video content page), or an extensible View (question answer page) or even tableView. Therefore, all types of content pages in App can be implemented and reused components only by simple configuration.
 
 <center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/pageType.png"></center>
 
-### 3. 内容页架构
+### 3. Content page architecture
 
-结合[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)以及组件化的设计思路，[HybridPageKit](https://github.com/dequan1331/HybridPageKit)整体的架构如下：
+Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension) and component-based，the architecture of [HybridPageKit](https://github.com/dequan1331/HybridPageKit) is below：
 
 <center><img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/hybrid.png"></center>
 
-通过继承特殊的内容页Controller并进行简单的配置，即可生成不同类型的内容页整体架构。框架内集成基本的Mustache解析和渲染。结合后台数据，只需实现对应页面中组件MVC逻辑即可。其中Model只需继承对应Protocol，Controller在内容页中注册，继承对应Protocol即可。
+By inheriting the special content page Controller and simply configuring it, we can generate different types of content page. Integrates basic Mustache parsing and rendering、combined with background data, it only needs to implement component MVC logic in corresponding pages. Model only implement the protocol, Controller registers in the content page, and implement the protocol.
 
 <br>
 
 > ***
->_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>_View on GitHub : **Easy integration framework for Content pages of News App**_ 
 >
->_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：A high-performance、high-extensibility、easy integration framework for Hybrid content page. Support most content page types of News App._
 >
->_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>_Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、and the details metioned in this article。_
 >
 >***
 
 <br>
 
 
-## <center>- 首屏加载速度优化 -</center>
+## <center>- Optimization of Loading speed -</center>
 ***
 
-新闻类App内容页，在Native的页面框架下，基于WebView进行加载和渲染。所以，从优化的角度就延伸出两个维度，即从Web的维度优化，以及从Native的维度优化。
+The news App content page is loaded and rendered based on WKWebView under the framework of Native page. Therefore, from the perspective of optimization, we extend two dimensions, that is, the optimization of Web dimension and the optimization of Native dimension.
 
-### 1. Web维度的优化
+### 1. Web dimension
 
--	WKWebView的复用 : 
+-	Reuse of WKWebView : 
 
-	通过WKWebView的复用，极大的缩短了WebView从创建到渲染结束的时间。
+	The reuse of WKWebView can greatly shorten the time from WebView creation to the end of rendering.
 	
-- 	利用HTTP缓存 : 
+- 	Using HTTP caching : 
 
-	对于内容WebView中必要的CSS以及JS，以及必要的基础Icon，可以通过设置HTTP缓存，依靠浏览器自身缓存提高效率。同时通过资源md5校验以保证刷新资源。
+	For the necessary CSS and JS in WebView, and the necessary foundation Icon, we can increase the efficiency by setting HTTP cache and relying on browser's own cache. At the same time, the resource MD5 is checked to ensure refreshing resources.
 	
--  减少资源请求并发 : 
+-  Reduction of resource request concurrency : 
 
-	通过Native化全部非文字类的内容，Web页面只加载最近本的Html内容，减少了业务逻辑的资源请求和并发。
+	By converting all non-Text components into Native, Web pages load only the latest Html string, thus it can reduce the resource requests and concurrency of business logic.
 	
-- 	减少Dom & Javascript复杂度 : 
+- 	Decrease Dom & Javascript complexity : 
 
-	通过Native化全部非文字类的内容，极大的减少了Dom的复杂度、CSS的复杂度以及过多的JS业务逻辑。
+	By converting all non-Text components into Native, it greatly reduce the complexity of Dom, the complexity of CSS, and the excessive JS business logic.
 	
--  其它Web优化通用方法 : 
+-  Other general methods for Web optimization : 
 
-	精简Javascript，使用iconFont，CSS & Javascript文件压缩等
+	Streamline Javascript, use of iconFont, CSS & Javascript file compression, etc.. 
 
-### 2. Native维度的优化
 
--	数据模板分离，资源并行加载 :
+### 2. Native dimension
 
-	基于后台数据以及Native化组件，内容页Html中模板与数据分离，使得全部资源如图片视频等都可以通过Native在合适的时机异步并行加载。不依赖与Web的渲染。
+-	Data template separation & Parallel loading :
 
--  预加载数据,延迟加载组件:
+	Based on server data and Native components, the page template and component data are separated from the content page Html so that all the resources, such as picture 、video, can be loaded asynchronously at the appropriate time by Native. It is not dependent on the rendering of Web.
 
-	对于内容页关键内容（Webview）的拉取，大部分App都放到了列表页中进行。进入内容页时直接从Cache中取出内容模板，直接交给WebView渲染。基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)扩展丰富的状态及二级缓存，在页面滚动的过程中各个组件也可以精确的实现按需加载、预加载等逻辑。
+-  Preload data & delayed load component:
 
--	Native化非文字UI，及组件化实现负载均衡 :
+	Most of the App put the content page's key content requset on the list page. When entering the content page, extract the content template directly from Cache and give it to WebView rendering directly. [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview) expand the rich state and the two level cache, each component can also on-demand loading, preloading and delay release.
 
-	WebView中非文字类UI Native化，极大的缩短了展示所需的流程，减少了进程间通信，减少了I/O及图片编解码逻辑，提高了类似图片类的UI展示速度。
+-	Native non-Text components & Priority :
+
+	Changing the non-Text components to Native in WebView can greatly reduce the process required for display, reduce IPC communication, reduce I/O and picture repect decode logic, and improve the UI display speed.
 	
-	组件的解耦与自管理，以及广播delegate的实现，为组件的按需加载、按优先级加载提供了基础。对于内容页的各个组件来说，在内容页展示之前大部分是不需要初始化、数据拉取以及渲染的。组件化之后的组件可以根据业务优先级，在不同的关键生命周期回调中实现业务逻辑，以减轻内容页创建、模板拼接以及WebView渲染的压力。简单的举例，由于内容WebView几乎都大于一屏，扩展区中的全部组件都可以在WebView渲染结束后进行View创建、网络拉取和渲染等，这样即不影响用户的使用，同时极大的释放了渲染结束前的网络、XPC及CPU压力，提高首屏展示速度。
+	The decoupling and self management of components, as well as the implementation of broadcast delegate, provide a basis for on-demand loading of components and priority loading components. Most of the components of the content page do not need initialization、fetching data and rendering before the content page is rendered. Component-based components can implement business logic in different key lifecycle callbacks based on business priorities to mitigate the pressure of content page creation, template splicing, and WebView rendering. Taking a simple example, as the content WebView is almost all larger than a screen, all the components in the extended area can achieve View creation, network fetching after the end of the WebView rendering, which does not affect the user's use, at the same time, it releases the pressure of the network, IPC and CPU before the end of the rendering, and improves the display speed of the webview.
 	
-	<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/need.png"></center>
+	<center><img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/need-en.png"></center>
 <br>
+
 - 	Reuse when scrolling & Reuse between pages & Model cache frame:
 
 	The extension of data Model base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview), caching View frame information, combined with view's reuse when scrolling, can greatly reduce the logic and computation of UI layout. The reuse of components when scrolling and the reuse of components between pages can also reduce the initialization time of component View.
@@ -360,17 +362,17 @@ WebView及组件View实现自动回收逻辑，每次在申请新View时检测�
 
 To sum up, from the click of a cell on the list, to the end of the WebView rendering, and finally to the user's scroll operation, the whole optimization strategy is as follows based on the order of time:
 
-<center><img width="90%" height="90%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/opt.png"></center>
+<center><img width="90%" height="90%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/opt-en.png"></center>
 
 
 <br>
 
 > ***
->_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>_View on GitHub : **Easy integration framework for Content pages of News App**_ 
 >
->_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：A high-performance、high-extensibility、easy integration framework for Hybrid content page. Support most content page types of News App._
 >
->_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>_Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、and the details metioned in this article。_
 >
 >***
 
@@ -379,13 +381,13 @@ To sum up, from the click of a cell on the list, to the end of the WebView rende
 ## <center>- Tips -</center>
 ***
 
-对于新闻类App内容页的完整的解决方案，还有一些基本的技术点，比如模板引擎及模板拼接的模块、JSApi注入及管理的模块等等，由于篇幅所限，暂且不做深入的展开。
+For the complete solution of the news App content page, there are also some basic technical points, such as template engine and template splicing module, JSApi injection and management module and so on. Due to space constraints, there is no details for further development on this. 
 
--	新闻类App的内容页，除去基本的渲染HTML数据外，同时也需要支持服务于活动、运营的临时H5页面。这些页面为了和Native进行交互，在自定义JSApi注入、JSBridge的选择、后台下发domain黑白名单、以及相关的安全性考虑也是整个实现中重要的一环。同时由于WKWebView支持复用回收，加载本地Html类型的WebView应该与加载H5的WebView在不同的回收复用池分开管理。
+-	For content page of news App, excluding the basic rendering of HTML string, it also needs temporary H5 pages to support Game、activities and promotion. In order to interact with Native, these are some important parts of the entire implementation such as the custom JSApi injection, the choice of JSBridge, the black-and-white list of domain in the server, and the related security considerations. Meanwhile, Since WKWebView supports reuse, the WebView which loading local Html string should be separately managed from the different reuse pools of WebView which loading url. 
 
--	对于底层页图片的管理，绝大多数App都将之纳入了App统一的图片管理体系中。无论使用哪个开源图片库，在缓存策略上，尽量将底层页图片的缓存策略与其他的有所区分，或者使用`LRU + FIFO`的缓存策略，避免进入底层页大量图片占用缓存空间，导致列表图片释放。同时从使用的角度来说，重复进入同一篇文章的场景也不会频繁的出现。
+-	For the management of the content page images, the majority of App are incorporated into the unified picture management system of App. No matter which open source image library is used, the image caching strategy of the content page should be distinguished from others, or the cache strategy of `LRU + FIFO` is used to avoid the entry of a large number of pictures in the content page to take up the cache space, resulting in the release of the pictures in list .
 
--	由于各个App的数据接口和技术选型不同，在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中只简单的实现了基于Mustache的模板拼接，主要是由于它的logic-less、多终端集成的方便以及开源社区的活跃。对于这部分逻辑，需要根据后台数据的格式及业务需求自定义的扩展。
+- 	Because of the different server interface and technology selection of each App, in [HybridPageKit](https://github.com/dequan1331/HybridPageKit) the template splicing based on Mustache is simply realized, the reason is mainly because of its logic-less, multi terminal integration convenience and open source community's activity. For this part of the logic, it is required to customize the extension according to the format of the server data and business requirements.
 
 The overall optimization of content pages depends on the technical implementation and structure of the entire App. In the process of implementation and optimization, there are many trade-offs and compromises, as well as many general and detailed optimization, which are not detailed here. 
 
@@ -396,15 +398,13 @@ The overall optimization of content pages depends on the technical implementatio
 
 The implementation of all the analysis of the paper is achieved into three frameworks except business logic:[HybridPageKit](https://github.com/dequan1331/HybridPageKit)、[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)以及[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension) Finally, dozens of lines of code can be used to complete various types、 high-performance 、high-extensibility、easy integration hybrid content page of News App.  
 
-有任何疑问，欢迎提交 issue， 或者直接修改提交 PR!
-
 <br>
 
 > ***
->_插播广告 —— 几十行代码完成新闻类App多种形式内容页_ 
+>_View on GitHub : **Easy integration framework for Content pages of News App**_ 
 >
->_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对新闻类App高性能、易扩展、组件化的通用内容页实现框架。_
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：A high-performance、high-extensibility、easy integration framework for Hybrid content page. Support most content page types of News App._
 >
->_基于[ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、以及本文中关于内容页架构和性能的探索。_
+>_Base on [ReusableNestingScrollview](https://github.com/dequan1331/ReusableNestingScrollview)、[WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension)、and the details metioned in this article。_
 >
 >***
