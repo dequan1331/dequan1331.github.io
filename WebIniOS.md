@@ -88,30 +88,68 @@ window.webkit.messageHandlers.{NAME}.postMessage()
 
 ### 2. 脱离WebView的通信JavaScriptCore
 
+- JavascriptCore
+JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，Apple对原有的C/C++代码进行了OC的封装，成系统级的framework供开发者使用。作为一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向，由于篇幅的限制暂且不做深入的讨论。
+
+[图](*******)
+
+- JavascriptCore.framework
+
+	1. JSVirtualMachine：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。应用就是多线程？
+	2. JSContext：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
+	3. JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
+	4. JSExport：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
+
+- 内存
+	Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。
+
+- 基本使用
+	1. 赋值Block回调
+	2. JSExport
+
+	无论通过以上两种方式进行通信，其核心都是将 保存到一个全局的Object中，例如window。
+
+
 JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引擎分别统治了移动端的iOS和Android系统。JavascriptCore从iOS7被引入后，提供了脱离WebView执行Javascript的环境和能力。
 
-当然对于一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向。
+当然对于一个
 
 
 
 ### 3. App中的应用场景
 
+-  对于基于WebView的通信，主要用于App向H5页面中注入的Javascript Open Api，如提供Native的拍照、音视频、定位；以及App内的登录、分享等等功能。
+-  对于JavaScriptCore，则催生了动态化、跨平台以及热修复等一系列技术的蓬勃发展。
+
 ## 动态化、跨平台与热修复
 
 整体上来说，就是国外开发者痴迷于跨平台的开发，国内开发者执着于热更新与修复。
 
+积极探索的方向
+
+随着Google开源了基于Dart语言的Flutter，跨平台的技术又进入了一个新的发展阶段。
+
+庞大的技术分支，但是作为最重要的Native和Web的通信桥梁，
 
 
-### 2. 跨平台
+在此基础之上，围绕着DSL的解析、方法表的注册、参数传递的设计以及OC Runtime的运用等不同方向，封装成了一个又一个跨平台的项目。
+
+### 2. 基于Web的跨平台技术
+
+
+
+以Javascript作为DSL的跨平台技术方案。
 
 目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
 
-### 3. 热修复
+### 3. 基于Web的热修复技术
 
-对于国内的iOS开发者来说，审核周期、敏感业务、支付分成以及bug修复都催生了热修复方向的不断探索。在苹果加强审核之前，几乎所有大型的App都把热修复当成了iOS开发的基础能力，最近[移动开发还有救么](https://mp.weixin.qq.com/s/6znQEtQ9L2zptohSTx9-Ew)这篇文章也详细的介绍了相关黑科技的前世今生。在所有iOS热修复的方案中，基于Javascript、同时也是影响最大的就是JSPatch。
+对于国内的iOS开发者来说，审核周期、敏感业务、支付分成以及bug修复都催生了热修复方向的不断探索。在苹果加强审核之前，几乎所有大型的App都把热修复当成了iOS开发的基础能力，最近[移动开发还有救么](https://mp.weixin.qq.com/s/6znQEtQ9L2zptohSTx9-Ew)也详细的介绍了相关黑科技的前世今生。在所有iOS热修复的方案中，基于Javascript、同时也是影响最大的就是JSPatch。
 
-
-
+- 通信采用Block回调的方式
+- 而同样基于JavascriptCore，热修复技术没有注册的机制。
+- 那么JS是如何运行OC方法不报错
+- require 就是在全局作用域上创建一个Object
 
 
 
@@ -122,6 +160,8 @@ JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引�
 随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
 
 用户体验、增长与转化率上都至关重要
+
+
 
 ### 1. 不同业务场景的优化策略
 
