@@ -1,18 +1,10 @@
----
-layout: web_in_iOS
----
-
+# iOS开发中的Web应用概述
 
 ## 目录
 
 ## iOS中Web容器与加载
 
 ### 1. iOS中的Web容器
-
-<center>
-	<img width="20%" height="20%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/1.png">
-	<img width="20%" height="20%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/2.png">
-</center>
 
 目前iOS系统为开发者提供三种方式来展示Web内容：
 
@@ -34,20 +26,50 @@ layout: web_in_iOS
 	对于SFSafariViewController：由于其标准化程度之高，使之界面和交互逻辑无法和App统一，基于App的整体体验一般都使用在相对独立的功能和模块中，最常见的就是在App内打开App Store或者广告、游戏推广的页面。
 
 	对于UIWebView/WKWebView：如果说之前由于NSURLProtocol的问题，好多App都在继续使用UIWebView，那么随着App放弃维护UIWebView（iOS12），全部的App应该会陆续的切换到WKWebView中来。当然，WKWebView也为开发者们带来了一些难题。最初都整理在，随着系统的不断升级也修改和修复了一些问题，简单列举几个：
-	1. NSURLProtocol[WebKit源码](*******)
-	2. 白屏 - 白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
-	3. Cookie
-	4. Javascript的异步执行
-	5. POST参数
+	
+	1. NSURLProtocol支持
+
+		- WKWebView最为显著的改变，就是不支持NSURLProtocol。为了兼容旧的业务逻辑，一部分App通过[WKBrowsingContextController]()中的非公开方法实现了NSURLProtocol。
+
+			```objc
+			+ (void)registerSchemeForCustomProtocol:(NSString *)scheme WK_API_DEPRECATED_WITH_REPLACEMENT("WKURLSchemeHandler", macos(10.10, WK_MAC_TBA), ios(8.0, WK_IOS_TBA));
+			```
+	
+		- 在iOS11中，系统增加了 `setURLSchemeHandler`函数用来拦截自定义的Scheme。但是不同于UIWebView，新的函数只能拦截自定义的Scheme[(SchemeRegistry.cpp)](https://github.com/WebKit/webkit/blob/master/Source/WebCore/platform/SchemeRegistry.cpp)，对使用最多的HTTP/HTTPS依然不能有效的拦截。
+		
+			```objc
+		    static const StringVectorFunction functions[] {
+		        builtinSecureSchemes,                // about;data...
+		        builtinSchemesWithUniqueOrigins,     // javascript...
+		        builtinEmptyDocumentSchemes,
+		        builtinCanDisplayOnlyIfCanRequestSchemes,
+		        builtinCORSEnabledSchemes,           //http;https
+		    };
+		```
+	
+	2. 白屏 - 
+		- 白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
+	3. 其他WKWebView的系统级问题如Cookie、POST参数、异步Javascript等等一系列的问题，可以通过业务逻辑的调整重新适配
+	4. 由于WebKit源码等开放性，我们也可以利用私有方法来简化代码逻辑、实现复杂的产品需求。例如在[WKWebViewPrivate](https://github.com/WebKit/webkit/blob/master/Source/WebKit/UIProcess/API/Cocoa/WKWebViewPrivate)中可以获得各种页面信息、直接取到UserAgent、 在[WKBackForwardListPrivate]()中可以清理掉全部的跳转历史、以及在[WKContentViewInteraction]()中替换方法实现自定义的MenuItem等等。
+
+		```objc
+		@interface WKWebView (WKPrivate)
+		@property (nonatomic, readonly) NSString *_userAgent WK_API_AVAILABLE(macosx(10.11), ios(9.0));
+		...
+		
+		@interface WKBackForwardList (WKPrivate)
+		- (void)_removeAllItems;
+		...
+		
+		@interface WKContentView (WKInteraction)
+		- (BOOL)canPerformActionForWebView:(SEL)action withSender:(id)sender;
+		```
+
 
 
 ### 2. WebKit框架与使用
 
 - WebKit.framework
-
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
-</center>
 
 [官方文档](https://developer.apple.com/documentation/webkit)
 
@@ -58,11 +80,6 @@ layout: web_in_iOS
 - Web容器关键加载节点
 
 	对于Web开发者，业务逻辑一般通过基于Web页面和Dom渲染的关键节点来处理。而对于iOS开发者，WKWebView提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。	
-
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
-</center>
-
 - tricky
 
 	使用WKWebView带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法。
@@ -101,44 +118,77 @@ window.webkit.messageHandlers.{NAME}.postMessage()
 
 ```
 
-- WebViewBridge
+- WebViewJavascriptBridge
 
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/6.png">
-</center>
+### 2. 脱离WebView的通信 JavaScriptCore
 
-### 2. 脱离WebView的通信JavaScriptCore
+- JavascriptCore原理浅析
 
-- JavascriptCore
 JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，Apple对原有的C/C++代码进行了OC的封装，成系统级的framework供开发者使用。作为一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向，由于篇幅的限制暂且不做深入的讨论。
+
+词法分析 语法分析 字节码生成
 
 [图](*******)
 
 - JavascriptCore.framework
 
+	提供了脱离WebView执行Javascript的环境和能力。
+
 	1. JSVirtualMachine：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。应用就是多线程？
 	2. JSContext：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
-	3. JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
+	3. JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
 	4. JSExport：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
-
-<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
-</center>
 
 - 内存
 	Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。
+	由于 block 可以保有变量引用，而且 JSContext 也强引用它所有的变量，为了避免强引用循环需要特别小心。避免保有你的 JSContext 或一个 block 里的任何 JSValue。相反，使用 [JSContext currentContext] 得到当前上下文，并把你需要的任何值用参数传递。
+	
+	1. 循环引用
+	2. 提前释放
 
 - 基本使用
-	1. 赋值Block回调
-	2. JSExport
+
+	1. 创建JSContext
+
+	2. call js
+
+		```objc
+		JSValue *value = [self.jsContext evaluateScript:@"document.cookie"];
+		```
+	3. 赋值Block回调
+	
+		```objc
+		//Native
+		self.jsContext[@"addMethod"] = ^ NSInteger(NSInteger a, NSInteger b) {
+	      return a + b;
+		};
+		
+		//JS
+		console.log(addMethod(1, 2));    //3
+		```
+	
+	4. JSExport协议
+
+		```objc
+		//Native
+		@protocol testJSExportProtocol <JSExport>
+		@property (readonly) NSString *string;
+		...
+		@interface OCClass : NSObject <testJSExportProtocol>
+		
+		//JS
+		var OCClass = new OCClass();
+		console.log(OCClass.string);
+		```
+		
 
 	无论通过以上两种方式进行通信，其核心都是将 保存到一个全局的Object中，例如window。
-
-
-JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引擎分别统治了移动端的iOS和Android系统。JavascriptCore从iOS7被引入后，提供了脱离WebView执行Javascript的环境和能力。
-
-当然对于一个
-
+	
+	对于OC中的属性和实例方法，JavaScriptCore在prototype中创建对应的属性和方法，而类方法则在
+	
+	对于每一个导出的实例方法，JavaScriptCore都会在prototype中创建一个对应的方法；
+	对于么一个导出的实例属性，JavaScriptCore都会在prototype中创建一个对应一个存取器属性；
+	对于每一个导出的类方法，JavaScriptCore会在constructor对象中创建一个对应的JavaScript function.
 
 
 ### 3. App中的应用场景
@@ -159,10 +209,6 @@ JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引�
 
 在此基础之上，围绕着DSL的解析、方法表的注册、参数传递的设计以及OC Runtime的运用等不同方向，封装成了一个又一个跨平台的项目。
 
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/9.png">
-</center>
-
 ### 2. 基于Web的跨平台技术
 
 
@@ -170,10 +216,6 @@ JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引�
 以Javascript作为DSL的跨平台技术方案。
 
 目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
-
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/8.png">
-</center>
 
 ### 3. 基于Web的热修复技术
 
@@ -219,16 +261,15 @@ JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引�
 
 ### 1. Javascript Open Api
 
-随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、定位等，同时提供App内统一的登录态，统一的分享逻辑，以及其他App功能。
+随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。
 
-- 1
-- 2
+当然对于Api的设计和文档规范，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。
+
+- 1. 基于域名的安全控制
+- 2. 由于使用客户端注入，可以根据业务逻辑选择注入的等级
 - 3
 - 4
 
-<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
-</center>
 
 ### 2. 模板引擎
 
@@ -236,26 +277,24 @@ JavascriptCore作为Apple开发的开源Javascript的引擎，与Google的V8引�
 
 同时也提供了组件化管理业务模块的
 
-本质就是字符串的解析和替换拼接。
+本质就是字符串的解析和替换拼接。其实模板引擎都大同小异，Logic-less的宗旨也导致Mustache
 
-- GRMustache
-
-<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/10.png">
-</center>
+- GRMustache是基于[mustache](http://mustache.github.io/)
 
 ### 3. 资源动态更新和管理
 
 对于Web网络请求的资源来说，通过HTTP的缓存策略可以减少通信，提升加载速度。而对于本地的样式文件、JS注入文件、默认图片等资源，频繁的读取磁盘也在一定程度上影响了资源加载速度。（离线包）
 
+上文提到在WKWebView中虽然可以使用私有函数实现NSURLProtocol（或者iOS11+提供系统函数），但是仍然有许多问题。
+
 - WebServer
 	1. 可以在App中内置WebServer，将读取本地资源文件变成本地服务器的请求，这样就能扩展资源数据为Response，通过HTTP缓存技术实现层次化的缓存结构。（直接在file的url上加）
-	2. WebServer对比
+	2. 业界流行的Objc版开源WebServer，不外乎年久失修的[CocoaHTTPServer](https://github.com/robbiehanson/CocoaHTTPServer)以及[GCDWebServer](https://github.com/swisspol/GCDWebServer)，当然以上两个都是基于HTTP类型的，基于Socket有[]()。
+	3. 通过[ports used by Apple](https://support.apple.com/en-us/HT202944)，我们可以猜测有很多端口默认已经被占用。端口的存储与占用，前后台切换重启
+	4. url重定向，加时间
+
+	
 
 - 动态更新
 	1. 在资源内容发生变化时更改其Url，强制用户下载新资源。通常情况下，可以通过在文件名中嵌入文件的修改时间 & 版本号来实现。
-
-<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
-</center>
 
