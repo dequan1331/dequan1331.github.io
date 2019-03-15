@@ -1,10 +1,20 @@
-# iOS开发中的Web应用概述
+---
+layout: web_in_iOS
+---
+
 
 ## 目录
 
 ## iOS中Web容器与加载
 
 ### 1. iOS中的Web容器
+
+<center>
+	<img width="20%" height="20%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/1.png">
+	<img width="20%" height="20%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/2.png">
+	<img width="20%" height="20%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/13.png">
+</center>
+
 
 目前iOS系统为开发者提供三种方式来展示Web内容：
 
@@ -71,6 +81,10 @@
 
 - WebKit.framework
 
+<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
+</center>
+
 [官方文档](https://developer.apple.com/documentation/webkit)
 
 - Web容器使用流程
@@ -79,7 +93,12 @@
 
 - Web容器关键加载节点
 
-	对于Web开发者，业务逻辑一般通过基于Web页面和Dom渲染的关键节点来处理。而对于iOS开发者，WKWebView提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。	
+	对于Web开发者，业务逻辑一般通过基于Web页面和Dom渲染的关键节点来处理。而对于iOS开发者，WKWebView提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。
+	
+	<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
+	</center>
+	
 - tricky
 
 	使用WKWebView带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法。
@@ -120,6 +139,10 @@ window.webkit.messageHandlers.{NAME}.postMessage()
 
 - WebViewJavascriptBridge
 
+<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/6.png">
+</center>
+
 ### 2. 脱离WebView的通信 JavaScriptCore
 
 - JavascriptCore原理浅析
@@ -138,6 +161,10 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 	2. JSContext：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
 	3. JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
 	4. JSExport：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
+
+	<center>
+	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
+</center>
 
 - 内存
 	Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。
@@ -209,6 +236,10 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 
 在此基础之上，围绕着DSL的解析、方法表的注册、参数传递的设计以及OC Runtime的运用等不同方向，封装成了一个又一个跨平台的项目。
 
+<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/9.png">
+</center>
+
 ### 2. 基于Web的跨平台技术
 
 
@@ -216,6 +247,10 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 以Javascript作为DSL的跨平台技术方案。
 
 目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
+
+<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/8.png">
+</center>
 
 ### 3. 基于Web的热修复技术
 
@@ -270,12 +305,19 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 - 3
 - 4
 
+<center>
+	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
+</center>
 
 ### 2. 模板引擎
 
 对于新闻资讯类App，为了达到并行加载数据以及处理复杂的展示逻辑，绝大部分App都采用数据和模板分离下发的方式。而模板引擎相关技术的使用会使这种逻辑和表现分离的业务场景实现的更加简洁和优雅。
 
 同时也提供了组件化管理业务模块的
+
+<center>
+	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/10.png">
+</center>
 
 本质就是字符串的解析和替换拼接。其实模板引擎都大同小异，Logic-less的宗旨也导致Mustache
 
@@ -297,4 +339,8 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 
 - 动态更新
 	1. 在资源内容发生变化时更改其Url，强制用户下载新资源。通常情况下，可以通过在文件名中嵌入文件的修改时间 & 版本号来实现。
+
+	<center>
+	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
+</center>
 
