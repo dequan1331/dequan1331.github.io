@@ -3,11 +3,11 @@ layout: web_in_iOS
 ---
 
 
-## 目录
+# 目录
 
-## iOS中Web容器与加载
+# iOS中Web容器与加载
 
-### 1. iOS中的Web容器
+## 1. iOS中的Web容器
 
 <center>
 	<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/1.png">
@@ -39,7 +39,7 @@ layout: web_in_iOS
 	
 
 
-### 2. WebKit框架与使用
+## 2. WebKit框架与使用
 
 - #### WebKit.framework
 
@@ -59,31 +59,34 @@ layout: web_in_iOS
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
 	</center>
 	
-- #### 
+- #### WKWebView常见问题
 
 	使用WKWebView带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法。
-		1. `NSURLProtocol支持`
-
-		- WKWebView最为显著的改变，就是不支持NSURLProtocol。为了兼容旧的业务逻辑，一部分App通过[WKBrowsingContextController]()中的非公开方法实现了NSURLProtocol。
-
-			```objc
-			+ (void)registerSchemeForCustomProtocol:(NSString *)scheme WK_API_DEPRECATED_WITH_REPLACEMENT("WKURLSchemeHandler", macos(10.10, WK_MAC_TBA), ios(8.0, WK_IOS_TBA));
-			```
-	
-		- 在iOS11中，系统增加了 `setURLSchemeHandler`函数用来拦截自定义的Scheme。但是不同于UIWebView，新的函数只能拦截自定义的Scheme[(SchemeRegistry.cpp)](https://github.com/WebKit/webkit/blob/master/Source/WebCore/platform/SchemeRegistry.cpp)，对使用最多的HTTP/HTTPS依然不能有效的拦截。
 		
-			```objc
-		    static const StringVectorFunction functions[] {
-		        builtinSecureSchemes,                // about;data...
-		        builtinSchemesWithUniqueOrigins,     // javascript...
-		        builtinEmptyDocumentSchemes,
-		        builtinCanDisplayOnlyIfCanRequestSchemes,
-		        builtinCORSEnabledSchemes,           //http;https
-		    };
+	1. NSURLProtocol
+
+		WKWebView最为显著的改变，就是不支持NSURLProtocol。为了兼容旧的业务逻辑，一部分App通过[WKBrowsingContextController]()中的非公开方法实现了NSURLProtocol。
+		```objc
+		// WKBrowsingContextController
+		+ (void)registerSchemeForCustomProtocol:(NSString *)scheme WK_API_DEPRECATED_WITH_REPLACEMENT("WKURLSchemeHandler", macos(10.10, WK_MAC_TBA), ios(8.0, WK_IOS_TBA));
+		```
+	
+		在iOS11中，系统增加了 `setURLSchemeHandler`函数用来拦截自定义的Scheme。但是不同于UIWebView，新的函数只能拦截自定义的Scheme[(SchemeRegistry.cpp)](https://github.com/WebKit/webkit/blob/master/Source/WebCore/platform/SchemeRegistry.cpp)，对使用最多的HTTP/HTTPS依然不能有效的拦截。
+		```objc
+		//SchemeRegistry
+	    static const StringVectorFunction functions[] {
+	        builtinSecureSchemes,                // about;data...
+	        builtinSchemesWithUniqueOrigins,     // javascript...
+	        builtinEmptyDocumentSchemes,
+	        builtinCanDisplayOnlyIfCanRequestSchemes,
+	        builtinCORSEnabledSchemes,           //http;https
+	    };
 		```
 	
 	
-	2. 白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
+	2. 白屏
+
+		的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
 	
 	
 	3. 其他WKWebView的系统级问题如Cookie、POST参数、异步Javascript等等一系列的问题，可以通过业务逻辑的调整重新适配
@@ -105,24 +108,33 @@ layout: web_in_iOS
 
 
 
-### 3. App中的应用场景
+## 3. App中的应用场景
 
-由于WebView系统级提供两种类型的加载方式，加载URL & 加载HTML\Data，所以基于此延伸出两种不同的业务场景：加载URL的页面直出类和加载数据的模板渲染类，同时各自也有不同的优化重点及方向。
+WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数从加载的类型上可以分为两类：加载URL & 加载HTML\Data。所以基于此也延伸出两种不同的业务场景：加载URL的**页面直出**类和加载数据的**模板渲染**类，同时两种类型各自也有不同的优化重点及方向。
+```objc
+//根据URL直接展示Web页面
+- (nullable WKNavigation *)loadRequest:(NSURLRequest *)request;
+
+//根据模板&数据渲染Web页面
+- (nullable WKNavigation *)loadHTMLString:(NSString *)string baseURL:(nullable NSURL *)baseURL;
+- (nullable WKNavigation *)loadFileURL:(NSURL *)URL allowingReadAccessToURL:(NSURL *)readAccessURL API_AVAILABLE(macosx(10.11), ios(9.0));
+...
+```
 
 - 页面直出
 
-通常各类App中的Web页面加载都是通过加载URL的方式，比如嵌入的运营活动页面、广告页面等等。
+	通常各类App中的Web页面加载都是通过加载URL的方式，比如嵌入的运营活动页面、广告页面等等。
 
 - 模板渲染
 
-需要WebView加载，且交互逻辑较多的页面，最常见的就是新闻类App的内容展示页。
+	需要WebView加载，且交互逻辑较多的页面，最常见的就是新闻类App的内容展示页。
 
 
-## iOS中的Web与Native的通信 - Javascript
+# iOS中的Web与Native的通信
 
 单纯的使用Web容器加载页面已经不能满足复杂的功能，开发者希望数据可以在Native和Web之间通信传递来实现复杂的功能，而Javascript就是通信的媒介。对于有WebView的情况，虽然WKWebView提供了系统级的方法，但是大部分App仍然使用基于URLScheme的WebViewBridge用以兼容。而脱离了WebView容器，系统提供了JavaScriptCore的framework，它也为之后蓬勃发展的跨平台和热修复技术提供了可能。
 
-### 1. 基于WebView的通信
+## 1. 基于WebView的通信
 
 - UIWebView & WKWebView
 
@@ -410,5 +422,5 @@ JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，App
 
 	<center>
 	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
-</center>
+	</center>
 
