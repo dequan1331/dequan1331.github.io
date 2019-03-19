@@ -1,6 +1,9 @@
 ---
 layout: web-in-ios
 ---
+
+移动开发领域近年来已经逐渐告别了野蛮生长的时期，进入了相对成熟的时代。而一直以来Native和Web的争论从未停止，通过开发者孜孜不倦的努力，Web的效率和Native的体验也一直在寻求着平衡。本文聚焦iOS开发和Web开发的交叉点，希望能通过简要的介绍，帮助开发者一窥Hybrid和大前端的构想。
+
 <br>
 > ***
 >_插播广告 —— 几十行代码完成资讯类App多种形式内容页_ 
@@ -210,18 +213,19 @@ layout: web-in-ios
 	JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，Apple对原有的C/C++代码进行了OC的封装，成系统级的framework供开发者使用。作为一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向，由于篇幅的限制暂且不做深入的讨论。
 
 <center>
-<img width="25%" height="25%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/24.png">
+<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/24.png">
 </center>
+<br>
 
 - #### JavascriptCore.framework
 
-	提供了脱离WebView执行Javascript的环境和能力。
+	虽然JavascriptCore.framework只暴露了较少的头文件和系统函数，但却提供了在App中脱离WebView执行Javascript的环境和能力。
 
-	- `JSVirtualMachine`：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。应用就是多线程？
+	- `JSVirtualMachine`：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。
 	- `JSContext`：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
-	- `JSValue`：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
-	- `JSManagedValue`：Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。所以在JavascriptCore使用过程中，难免会遇到`循环引用`以及`提前释放`的问题。
-	- `JSExport`：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
+	- `JSValue`：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，需要注意OC中的Block转换为JS中的function，Class转换为Constructor等等。
+	- `JSManagedValue`：Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。所以在JavascriptCore使用过程中，难免会遇到`循环引用`以及`提前释放`的问题。JSManagedValue解决了在两种环境中的内存管理问题。
+	- `JSExport`：提供了类、属性和实例方法的调用接口。内部实现是在ProtoType & Constructor中实现对应的属性和方法。
 <br>
 <center>
 <img width="25%" height="25%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
@@ -234,7 +238,7 @@ layout: web-in-ios
 		```objc
 		JSValue *value = [self.jsContext evaluateScript:@"document.cookie"];
 		```
-	- Web - Native: 对于Web侧向Native的通信，JavascriptCore提供两种方式，注册Block & Export协议。
+	- Web - Native: 对于Web侧向Native的通信，JavascriptCore提供 **两种** 方式，注册Block & Export协议。
 	
 		```objc
 		//Native
@@ -256,19 +260,13 @@ layout: web-in-ios
 		console.log(OCClass.string);
 		```
 		
-
-	无论通过以上两种方式进行通信，其核心都是将 保存到一个全局的Object中，例如window。
+	<br>
+	对于JavascriptCore粗浅的理解，可以认为使用Block方法，内部是将Block保存到保存到一个Web环境中的全局的Object中，例如window。而使用JSExport方法，则是在Web环境中Object的`prototype`中创建属性、实例方法；在`constructor`对象中创建类方法，从而实现Web中的调用。
 	
-	对于OC中的属性和实例方法，JavaScriptCore在prototype中创建对应的属性和方法，而类方法则在
-	
-	对于每一个导出的实例方法，JavaScriptCore都会在prototype中创建一个对应的方法；
-	对于么一个导出的实例属性，JavaScriptCore都会在prototype中创建一个对应一个存取器属性；
-	对于每一个导出的类方法，JavaScriptCore会在constructor对象中创建一个对应的JavaScript function.
-
-
 ## 3. App中的应用场景
 
 -  对于基于WebView的通信，主要用于App向H5页面中注入的Javascript Open Api，如提供Native的拍照、音视频、定位；以及App内的登录、分享等等功能。
+<br>
 -  对于JavaScriptCore，则催生了动态化、跨平台以及热修复等一系列技术的蓬勃发展。
 
 <br>
@@ -315,7 +313,7 @@ layout: web-in-ios
     		return _formatOCToJS(ret)
       }
 	```
-- 当然对于JSPatch以及其他热修复的项目来说，Web和Native通信只是整个框架中的一个技术点，更多的实现原理和细节由于篇幅的关系就不做过多的介绍了。
+- 当然对于JSPatch以及其他热修复的项目来说，Web和Native通信只是整个框架中的一个技术点，更多的实现原理和细节由于篇幅的关系暂且不做介绍。
 
 ## 2. 基于Web的跨平台技术
 
@@ -325,19 +323,20 @@ layout: web-in-ios
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/8.png">
 </center>
 
-而在其中，以Javascript作为前端DSL的跨平台技术方案里，FaceBook的[react-native](https://github.com/facebook/react-native)以及阿里(目前托管给了Apache)的[Weex](https://github.com/apache/incubator-weex)最为流行。在网络上两者的比较文章有很多，集中在学习成本、框架生态、代码侵入、性能以及包大小等。目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
+而在其中，以Javascript作为前端DSL的跨平台技术方案里，FaceBook的[react-native](https://github.com/facebook/react-native)以及阿里(目前托管给了Apache)的[Weex](https://github.com/apache/incubator-weex)最为流行。在网络上两者的比较文章有很多，集中在学习成本、框架生态、代码侵入、性能以及包大小等,各个业务可以根据自己的重点选择合理的技术结构。
 
-而Web和Native的通信桥梁仍然是JavascriptCore。
+而不管是`react-native`还是`Weex`,Web和Native的通信桥梁仍然是JavascriptCore。
 
 ```objc
-    JSValue* (^callNativeBlock)(JSValue *, JSValue *, JSValue *) = ^JSValue*(JSValue *instance, JSValue *tasks, JSValue *callback){
-		...
-      return [JSValue valueWithInt32:(int32_t)callNative(instanceId, tasksArray, callbackId) inContext:[JSContext currentContext]];
-    };
-    _jsContext[@"callNative"] = callNativeBlock; 
+//weex 举例
+JSValue* (^callNativeBlock)(JSValue *, JSValue *, JSValue *) = ^JSValue*(JSValue *instance, JSValue *tasks, JSValue *callback){
+	...
+  return [JSValue valueWithInt32:(int32_t)callNative(instanceId, tasksArray, callbackId) inContext:[JSContext currentContext]];
+};
+_jsContext[@"callNative"] = callNativeBlock; 
 ```
 
-同样，跨平台又是一个庞大的技术体系，JavascriptCore仅仅是作为整个体系运转中的一个小小的部分，而整个跨平台的技术方案就需要另开多个篇幅进行介绍了。
+和热修复技术一样，跨平台又是一个庞大的技术体系，JavascriptCore仅仅是作为整个体系运转中的一个小小的部分，而整个跨平台的技术方案就需要另开多个篇幅进行介绍了。
 
 <br>
 # <center>- iOS中Web相关优化策略 -</center>
@@ -345,19 +344,12 @@ layout: web-in-ios
 
 随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
 
-用户体验、增长与转化率上都至关重要
-
-
 
 ## 1. 不同业务场景的优化策略
 
 对于单纯的Web页面来说，业界早已有了合理的优化方向以及成熟的优化方案，而对于移动客户端中的Web来说，开发者在进行单一的Web优化同时，还可以通过优化Web容器以及Web页面中数据加载方式等多个途径做出优化。
 
-关键渲染路径。
-
-更为激进的优化，实现成本和对项目的侵入性比较大，LocalServer
-通过特殊的格式规范实现了分段缓存+增量更新，，业务形态
-
+所以对于iOS开发中的优化来说，就是通过Native和Web两个维度的优化关键渲染路径，保证WebView优先渲染完毕。由此我们梳理了内容页整体的加载顺序，从中找出关键渲染路径，继而逐个分析、优化。
 
 <center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/18.png">
@@ -366,34 +358,47 @@ layout: web-in-ios
 ## 2. Web维度的优化
 
 - #### 通用Web优化
-
+	 
+	 压缩资源文件，减少页面CSS/JS的逻辑，采用HTTP缓存
+	 
 - #### 离线包
 
 	由于Web页面内请求的不可控以及网络环境的影响，为了提升Web的加载响应速度，无论是直出类型还是渲染类型的Web页面都把部分资源打包到了Native本地，或是选择合适的时机由Native优先下载。这些提前下载的资源（HTML模板、JS文件、CSS文件、占位图片）在Web中称为离线包。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。
 	
 - #### 其他
+	
+	脱离较为通用的优化，在对代码侵入宽容度较高的场景中，开发者对Web优化有着更为激进的做法。例如在[VasSonic](https://github.com/Tencent/VasSonic)中，
+	
 
 ## 3. Native维度的优化
 
 - #### 容器复用和预热
 
-<center>
-<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
-</center>
+	WKWebView虽然JIT大幅优化了JS的执行速度，但是单纯的加载渲染HTML，WKWebView比UIWebView慢了很多。根据渲染的不同阶段分别对耗时进行测试，同时对比UIWebView，我们发现WKWebView在初始化及渲染开始前的耗时较多。
 
-- #### Native接管资源请求，替代Web内核的资源加载，可以做到并行加载
+	<center>
+	<img width="45%" height="45%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
+	</center>
 
-- #### 替换任意标签Native实现，地图、音视频、
+	针对这种情况，业界主流的做法就是复用 & 预热。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。
 
-<center>
+- #### Native接管资源请求
+	
+	替代Web内核的资源加载，可以做到并行加载
+
+- #### 替换任意标签Native实现，地图、音视频
+
+	<center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
-</center>
+	</center>
 
 - #### 按优先级划分业务逻辑
 
-<center>
+	从App的维度上看，一个Web页面从入口点击到渲染完成，或多或少都会有Native的业务逻辑并行执行。所以这个角度的优化关键渲染路径，就是优先保证WebView以及其他在首屏直接展示的Native模块优先渲染。所以承载Web页面的Native容器，可以根据业务逻辑的优先级，在保证WebView模块展示之后，选择合适的时机进行数据加载、视图渲染等。这样就能保证在内容页的维度上，关键路径优先渲染。
+	
+	<center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/17.png">
-</center>
+	</center>
 
 ## 4. 优化整体流程
 
@@ -418,6 +423,7 @@ layout: web-in-ios
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/10.png">
 </center>
 <br>
+
 - 模板引擎的本质就是字符串的解析和替换拼接。在Web端不同的使用场景有很多不同语法的引擎类型，而在客户端较为流行的，有使用较为复杂的[MGTemplateEngine](https://github.com/mattgemmell/MGTemplateEngine)，它类似于Smarty，支持部分模板逻辑。也有基于[mustache](http://mustache.github.io/)，Logic-less的[GRMustache](https://github.com/groue/GRMustache)可供选择。
 
 ## 2. 资源动态更新和管理
