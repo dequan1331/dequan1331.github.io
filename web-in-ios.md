@@ -37,6 +37,11 @@ layout: web-in-ios
 
 	对于`UIWebView/WKWebView`：如果说之前由于NSURLProtocol的问题，好多App都在继续使用UIWebView，那么随着App放弃维护UIWebView（iOS12），全部的App应该会陆续的切换到WKWebView中来。当然，最初WKWebView也为开发者们带来了一些难题，但是随着系统的升级与业务逻辑的适配也逐步的修复，后文会列举几个最为关注的技术点。
 	
+<center>
+	<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/20.png">
+	<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/21.png">
+</center>
+	
 
 ## 2. WebKit框架与使用
 
@@ -354,6 +359,10 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 ## 3. Native维度的优化
 
 - #### 容器复用和预热
+
+<center>
+<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
+</center>
 
 - #### Native接管资源请求，替代Web内核的资源加载，可以做到并行加载
 
