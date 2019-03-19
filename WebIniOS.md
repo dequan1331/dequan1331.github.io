@@ -60,7 +60,7 @@ layout: web_in_iOS
 	对于大部分日常使用来说，开发者需要关注的就是WebView的创建、配置、加载、以及系统回调的接收。
 	
 	<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/14.png">
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/14.png">
 	</center>
 
 	对于Web开发者，业务逻辑一般通过基于Web页面和Dom渲染的关键节点来处理。而对于iOS开发者，WKWebView提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。
@@ -205,19 +205,19 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 	- JSContext：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
 	- JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
 	- JSExport：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
-
-	<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
-	</center>
+<br>
+<center>
+<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
+</center>
 
 - #### 使用JavascriptCore进行通信
 
-	- Native - Web
+	- Native - Web: 通过JavascriptCore，Native可以直接在Context中执行JS语句，和Web侧进行通信和交互。
 
 		```objc
 		JSValue *value = [self.jsContext evaluateScript:@"document.cookie"];
 		```
-	- Native - Web
+	- Web - Native: 对于Web侧向Native的通信，JavascriptCore提供两种方式，注册Block & Export协议。
 	
 		```objc
 		//Native
@@ -347,48 +347,76 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 更为激进的优化，实现成本和对项目的侵入性比较大，LocalServer
 通过特殊的格式规范实现了分段缓存+增量更新，，业务形态
 
+
+<center>
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/18.png">
+</center>
+
 ## 2. Web维度的优化
-- HTTP缓存
-- 离线包
+
+- #### 通用Web优化
+- #### 离线包
+- #### 其他
 
 ## 3. Native维度的优化
 
-- Native接管资源请求，替代Web内核的资源加载，可以做到并行加载
-- 替换任意标签Native实现，地图、音视频、
+- #### 容器复用和预热
+- #### Native接管资源请求，替代Web内核的资源加载，可以做到并行加载
+- #### 替换任意标签Native实现，地图、音视频、
+
+<center>
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
+</center>
+
+- #### 按优先级划分业务逻辑
+
+<center>
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/17.png">
+</center>
 
 ## 4. 优化整体流程
 
+所以整体上对于客户端来说，我们可以从Native维度（容器和数据加载）以及Web维度两个方向提升加载速度，按照页面的加载流程，整体的优化方向如下：
+
+<center>
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/16.png">
+</center>
 
 # <center>- iOS中Web相关延伸业务 -</center>
 
 ## 1. Javascript Open Api
 
-随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。
+- 随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。所以针对第三方的Web页面，Native需要注册相应的Javascript接口供Web使用。
 
-当然对于Api的设计和文档规范，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。
+- 当然对于Api需要提供的能力、接口设计和文档规范，不同的业务逻辑和团队代码风格会有不同的定义，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。而脱离Javascript Open Api对外的接口设计和封装，在内部的实现上也有一些通用的关键因素，这里简单列举几个：
 
-- 1. 基于域名的安全控制
-- 2. 由于使用客户端注入，可以根据业务逻辑选择注入的等级
-- 3
-- 4
+	- #### 注入方式和时机
+	
+		对于Javascript文件的注入，最简单的就是将文件打包到项目中，使用WKWebView提供的系统函数进行注入。这种方式无需网络加载，可以合理的选择注入时机，但是无法动态的进行修改和调整。而对于这部分业务需求需要经常调整的App来说，也可以把文件存储到CDN，通过模板替换或者和Web合作者约定，在Web的HTML中通过URL的方式进行加载，这种的方式虽然动态话程度较高，但是需要合作方的配合，同时对于JS Api也不能做到拆分的注入。
+		
+		针对上面的两种方式的不足，一个较为合理的方式是建立资源的动态更新系统（下文具体介绍），同时Javascript文件采用本地注入的方式。这样一方面支持了动态更新，也无需合作方的配合，同时对于不同的业务场景可以拆分不同的Api进行注入，保证安全。
+
+	- #### 安全控制
+
+		对于Javascript Open Api设计实现的另一个重要方面，就是安全性的控制。由于完整的Api需要支持Native登录、Cookies等较为敏感的信息获取，同时也支持一些对UI和体验影响较多的功能如页面跳转、分享等，所以App需要一套权限分级的逻辑控制Web相关的接口调用，保证体验和安全。
+		
+		常规的做法就是在Javascript Open Api建立分级的管理，不同权限的Web页面只能调用各自权限内的接口。客户端通过Domain进行分级，同时支持动态拉取权限Domain白名单，灵活的配置Web页面的权限。在此基础上App内部也可以通过业务逻辑的划分，在Native层面使用不同的容器加载页面，而容器根据业务逻辑的不同，注入不同的JS文件进行权限控制。
 
 <center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
+	<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
 </center>
 
 ## 2. 模板引擎
 
-为了达到并行加载数据以及并行处理复杂的展示逻辑，对于非直出类型的Web页面，绝大部分App都采用数据和模板分离下发的方式。而这样的技术架构，导致在客户端内需要增加替换对应DSL的模板标签，形成最终的HTML的业务逻辑。简单的字符串替换逻辑不但低效，还无法做到合理的组件化管理，而模板引擎相关技术会使这种逻辑和表现分离的业务场景实现的更加简洁和优雅。
+- 为了达到并行加载数据以及并行处理复杂的展示逻辑，对于非直出类型的Web页面，绝大部分App都采用数据和模板分离下发的方式。而这样的技术架构，导致在客户端内需要增加替换对应DSL的模板标签，形成最终的HTML的业务逻辑。简单的字符串替换逻辑不但低效，还无法做到合理的组件化管理，以及组件合理的与Native交互，而模板引擎相关技术会使这种逻辑和表现分离的业务场景实现的更加简洁和优雅。
 
-
+- 基于模板引擎与数据分离，客户端可以根据数据并行创建子业务模块，同时在子业务模块中处理和Native交互的部分如图片裁剪适配、点击跳转等等，生成HTML代码片段。之后基于模板进行替换生成完整的页面。这样不但减少了大量的字符串替换逻辑，同时业务也得到了合理拆分。
 
 <center>
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/10.png">
 </center>
-
-本质就是字符串的解析和替换拼接。其实模板引擎都大同小异，Logic-less的宗旨也导致Mustache
-
-- GRMustache是基于[mustache](http://mustache.github.io/)
+<br>
+- 模板引擎的本质就是字符串的解析和替换拼接。在Web端不同的使用场景有很多不同语法的引擎类型，而在客户端较为流行的，有使用较为复杂的[MGTemplateEngine](https://github.com/mattgemmell/MGTemplateEngine)，它类似于Smarty，支持部分模板逻辑。也有基于[mustache](http://mustache.github.io/)，Logic-less的[GRMustache](https://github.com/groue/GRMustache)可供选择。
 
 ## 3. 资源动态更新和管理
 
