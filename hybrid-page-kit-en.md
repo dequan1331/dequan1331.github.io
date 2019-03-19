@@ -1,5 +1,5 @@
 ---
-layout: HybridPageKit-EN
+layout: hybrid-page-kit-EN
 ---
 
 Shown by relevant data by the end of 2017, China's mobile phone news App scale has reached 636 million people, and mobile App has become one of the most important ways of news and content dissemination. With the competition and development of the industry, the **content page in App** plays a more important role in improving the quality of App, enhancing the Time on App and increasing the viscosity of the user. Meanwhile, it also faces more challenges.

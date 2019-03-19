@@ -1,10 +1,11 @@
 ---
-layout: web_in_iOS
+layout: web-in-ios
 ---
 
-
+<br>
 # <center>- 目录-</center>
 
+<br>
 # <center>- iOS中的Web容器与加载-</center>
 
 ## 1. iOS中的Web容器
@@ -52,8 +53,9 @@ layout: web_in_iOS
 	对于iOS中的WebKit.framework就是在WebCore、底层桥接、JSCore引擎等核心模块的基础上，针对iOS平台的项目封装。它基于新的WKWebView，提供了一系列浏览特性的设置，以及简单方便的加载回调。而具体类及使用，开发者可以查阅[官方文档](https://developer.apple.com/documentation/webkit)。
 
 <center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
 </center>
+<br>
 
 - #### Web容器使用流程与关键节点
 
@@ -96,7 +98,7 @@ layout: web_in_iOS
 	
 	2. 白屏
 
-		的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
+		一般WKWebView白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
 	
 	
 	3. 其他WKWebView的系统级问题如Cookie、POST参数、异步Javascript等等一系列的问题，可以通过业务逻辑的调整重新适配
@@ -138,7 +140,7 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 	```
 	需要WebView加载，且交互逻辑较多的页面，最常见的就是新闻类App的内容展示页。
 	
-
+<br>
 # <center>- iOS中的Web与Native的通信 -</center>
 
 单纯的使用Web容器加载页面已经不能满足复杂的功能，开发者希望数据可以在Native和Web之间通信传递来实现复杂的功能，而Javascript就是通信的媒介。对于有WebView的情况，虽然WKWebView提供了系统级的方法，但是大部分App仍然使用基于URLScheme的WebViewBridge用以兼容。而脱离了WebView容器，系统提供了JavaScriptCore的framework，它也为之后蓬勃发展的跨平台和热修复技术提供了可能。
@@ -190,24 +192,19 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 	词法分析 语法分析 字节码生成
 	[图](*******)
-	
-	- 内存
-	Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。
-	由于 block 可以保有变量引用，而且 JSContext 也强引用它所有的变量，为了避免强引用循环需要特别小心。避免保有你的 JSContext 或一个 block 里的任何 JSValue。相反，使用 [JSContext currentContext] 得到当前上下文，并把你需要的任何值用参数传递。
-		1. 循环引用
-		2. 提前释放
 
 - #### JavascriptCore.framework
 
 	提供了脱离WebView执行Javascript的环境和能力。
 
-	- JSVirtualMachine：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。应用就是多线程？
-	- JSContext：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
-	- JSValue/JSManagedValue：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
-	- JSExport：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
+	- `JSVirtualMachine`：提供了JS执行的底层资源及内存。虽然Java与Javascript没有一点关系，但是同样作为虚拟机，JSVM和JVM做了一部分类似的事情。每个JSVirtualMachine独占线程，拥有独立的空间和管理，但是可以包含多个JSContext。应用就是多线程？
+	- `JSContext`：提供了JS运行的上下文环境和接口。可以不准确的理解为，就是创建了一个Javascript中的Window对象。
+	- `JSValue`：提供了OC和JS间数据类型的封装和转换[Type Conversions](https://developer.apple.com/documentation/javascriptcore/jsvalue)。除了基本的数据类型，OC中的Block转换为JS中的function，Class转换为Constructor。
+	- `JSManagedValue`：Javascript使用GC机制管理内存，而OC采用引用计数的方式管理内存。所以在JavascriptCore使用过程中，难免会遇到`循环引用`以及`提前释放`的问题。
+	- `JSExport`：提供了类、属性和实例方法的调用接口。ProtoType & Constructor
 <br>
 <center>
-<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
+<img width="25%" height="25%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/7.png">
 </center>
 
 - #### 使用JavascriptCore进行通信
@@ -254,24 +251,16 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 -  对于基于WebView的通信，主要用于App向H5页面中注入的Javascript Open Api，如提供Native的拍照、音视频、定位；以及App内的登录、分享等等功能。
 -  对于JavaScriptCore，则催生了动态化、跨平台以及热修复等一系列技术的蓬勃发展。
 
+<br>
+# <center>- 跨平台与热修复 -</center>
 
-# <center>- 动态化、跨平台与热修复 -</center>
-
-整体上来说，就是国外开发者痴迷于跨平台的开发，国内开发者执着于热更新与修复。
-
-积极探索的方向
-
-随着Google开源了基于Dart语言的Flutter，跨平台的技术又进入了一个新的发展阶段。
-
-庞大的技术分支，但是作为最重要的Native和Web的通信桥梁，
-
-
-在此基础之上，围绕着DSL的解析、方法表的注册、参数传递的设计以及OC Runtime的运用等不同方向，封装成了一个又一个跨平台的项目。
+近几年来国内外移动端各种方案如雨后春笋般涌现，“Write once, run anywhere”不再是开发者的向往。剥离跨平台技术在Web侧DSL、virtualDom等方面的优化，以及Native侧Runtime的应用与封装，对于两端通信的核心，依然是JavascriptCore。
 
 <center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/9.png">
+<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/9.png">
 </center>
 
+而不同于国外开发者对跨平台技术的积极探索，国内开发者也对热修复技术产生了极大的热情。同样作为Native和Web的交叉 - JavascriptCore，依然承担着整个技术结构中的通信任务。
 
 ## 1. 基于Web的热修复技术
 
@@ -309,16 +298,15 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 ## 2. 基于Web的跨平台技术
 
-以Javascript作为DSL的跨平台技术方案。
-
-而同样基于JavascriptCore，热修复技术没有注册的机制。
-
-目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
+随着Google开源了基于Dart语言的Flutter，跨平台的技术又进入了一个新的发展阶段。对于传统的跨平台技术来讲，各个公司以JavascriptCore作为通信桥梁，围绕着DSL的解析、方法表的注册、模块注册通信、参数传递的设计以及OC Runtime的运用等不同方向，封装成了一个又一个跨平台的项目。
 
 <center>
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/8.png">
 </center>
 
+而在其中，以Javascript作为前端DSL的跨平台技术方案里，FaceBook的[react-native](https://github.com/facebook/react-native)以及阿里(目前托管给了Apache)的[Weex](https://github.com/apache/incubator-weex)最为流行。在网络上两者的比较文章有很多，集中在学习成本、框架生态、代码侵入、性能以及包大小等。目前，React Native已经开始了新一轮的重构，在线程模式、渲染方式、Native侧架构以及Api方向都会有较大的变化，相信未来在性能和使用上都会有更好的体验。
+
+而Web和Native的通信桥梁仍然是JavascriptCore。
 
 ```objc
     JSValue* (^callNativeBlock)(JSValue *, JSValue *, JSValue *) = ^JSValue*(JSValue *instance, JSValue *tasks, JSValue *callback){
@@ -328,8 +316,9 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
     _jsContext[@"callNative"] = callNativeBlock; 
 ```
 
+同样，跨平台又是一个庞大的技术体系，JavascriptCore仅仅是作为整个体系运转中的一个小小的部分，而整个跨平台的技术方案就需要另开多个篇幅进行介绍了。
 
-
+<br>
 # <center>- iOS中Web相关优化策略 -</center>
 
 随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
@@ -355,13 +344,19 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 ## 2. Web维度的优化
 
 - #### 通用Web优化
+
 - #### 离线包
+
+	由于Web页面内请求的不可控以及网络环境的影响，为了提升Web的加载响应速度，无论是直出类型还是渲染类型的Web页面都把部分资源打包到了Native本地，或是选择合适的时机由Native优先下载。这些提前下载的资源（HTML模板、JS文件、CSS文件、占位图片）在Web中称为离线包。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。
+	
 - #### 其他
 
 ## 3. Native维度的优化
 
 - #### 容器复用和预热
+
 - #### Native接管资源请求，替代Web内核的资源加载，可以做到并行加载
+
 - #### 替换任意标签Native实现，地图、音视频、
 
 <center>
@@ -382,31 +377,12 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/16.png">
 </center>
 
+<br>
 # <center>- iOS中Web相关延伸业务 -</center>
 
-## 1. Javascript Open Api
 
-- 随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。所以针对第三方的Web页面，Native需要注册相应的Javascript接口供Web使用。
 
-- 当然对于Api需要提供的能力、接口设计和文档规范，不同的业务逻辑和团队代码风格会有不同的定义，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。而脱离Javascript Open Api对外的接口设计和封装，在内部的实现上也有一些通用的关键因素，这里简单列举几个：
-
-	- #### 注入方式和时机
-	
-		对于Javascript文件的注入，最简单的就是将文件打包到项目中，使用WKWebView提供的系统函数进行注入。这种方式无需网络加载，可以合理的选择注入时机，但是无法动态的进行修改和调整。而对于这部分业务需求需要经常调整的App来说，也可以把文件存储到CDN，通过模板替换或者和Web合作者约定，在Web的HTML中通过URL的方式进行加载，这种的方式虽然动态话程度较高，但是需要合作方的配合，同时对于JS Api也不能做到拆分的注入。
-		
-		针对上面的两种方式的不足，一个较为合理的方式是建立资源的动态更新系统（下文具体介绍），同时Javascript文件采用本地注入的方式。这样一方面支持了动态更新，也无需合作方的配合，同时对于不同的业务场景可以拆分不同的Api进行注入，保证安全。
-
-	- #### 安全控制
-
-		对于Javascript Open Api设计实现的另一个重要方面，就是安全性的控制。由于完整的Api需要支持Native登录、Cookies等较为敏感的信息获取，同时也支持一些对UI和体验影响较多的功能如页面跳转、分享等，所以App需要一套权限分级的逻辑控制Web相关的接口调用，保证体验和安全。
-		
-		常规的做法就是在Javascript Open Api建立分级的管理，不同权限的Web页面只能调用各自权限内的接口。客户端通过Domain进行分级，同时支持动态拉取权限Domain白名单，灵活的配置Web页面的权限。在此基础上App内部也可以通过业务逻辑的划分，在Native层面使用不同的容器加载页面，而容器根据业务逻辑的不同，注入不同的JS文件进行权限控制。
-
-<center>
-	<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
-</center>
-
-## 2. 模板引擎
+## 1. 模板引擎
 
 - 为了达到并行加载数据以及并行处理复杂的展示逻辑，对于非直出类型的Web页面，绝大部分App都采用数据和模板分离下发的方式。而这样的技术架构，导致在客户端内需要增加替换对应DSL的模板标签，形成最终的HTML的业务逻辑。简单的字符串替换逻辑不但低效，还无法做到合理的组件化管理，以及组件合理的与Native交互，而模板引擎相关技术会使这种逻辑和表现分离的业务场景实现的更加简洁和优雅。
 
@@ -418,22 +394,32 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 <br>
 - 模板引擎的本质就是字符串的解析和替换拼接。在Web端不同的使用场景有很多不同语法的引擎类型，而在客户端较为流行的，有使用较为复杂的[MGTemplateEngine](https://github.com/mattgemmell/MGTemplateEngine)，它类似于Smarty，支持部分模板逻辑。也有基于[mustache](http://mustache.github.io/)，Logic-less的[GRMustache](https://github.com/groue/GRMustache)可供选择。
 
-## 3. 资源动态更新和管理
+## 2. 资源动态更新和管理
 
-- #### 离线包
-	由于Web页面内请求的不可控以及网络环境的影响，为了提升Web的加载响应速度，无论是直出类型还是渲染类型的Web页面都把部分资源打包到了Native本地，或是选择合适的时机由Native优先下载。这些提前下载的资源（HTML模板、JS文件、CSS文件、占位图片）在Web中称为离线包。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。
+无论是离线包、本地注入的JS、CSS文件、以及Web中的默认图片，目的都是通过打包或提前下载，替换网络请求为本地读取来优化Web的加载体验。而对于这些资源的管理，开发者需要从合理的下载与更新，以及Web中合理的访问这两个方面进行设计。
 
-	对于离线包的使用，大部分都依赖于NSURLProtocol。
-	上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。
+- #### 下载与更新
+	
+	1. 而对于类似的通用资源下载于更新，我们需要
+	1. 在资源内容发生变化时更改其Url，强制用户下载新资源。通常情况下，可以通过在文件名中嵌入文件的修改时间 & 版本号来实现。
+	2. 离线包：增量更新，
+	3. 签名校验&重试
+	4. url重定向，加时间
+
+	<center>
+	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
+	</center>
 
 
+- #### 基于LocalServer的访问
 
-- #### LocalServer
+	离线包自身的下载业务，需要考虑下载时机、是否采用增量下载、校验等等通用的问题。而对于已经下载好的离线包，如何将Web请求重定向到本地，大部分App都依赖于NSURLProtocol。上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。开发者可以通过集成LocalServer，接管部分Web请求，从而达到访问本地资源的目的，同时LocalServer的引入还可以为我们自定义HTTP缓存提供基础。
 
 	对于Web网络请求的资源来说，通过HTTP的缓存策略可以减少通信，提升加载速度。而对于本地的样式文件、JS注入文件、默认图片等资源，频繁的读取磁盘也在一定程度上影响了资源加载速度。（离线包）
 	为了解决WKWebView中NSURLProtocol的问题，
 	同时，离线包的使用是将需要下载的网络资源优化成了本地读取。而本地读取的资源，为了减少I/O，进一步优化性能，部分App集成了LocalServer，通过将本地资源封装成Response，利用HTTP的缓存技术，进一步的优化了读取的时间和性能。可以在App中内置WebServer，将读取本地资源文件变成本地服务器的请求，这样就能扩展资源数据为Response，通过HTTP缓存技术实现层次化的缓存结构。（直接在file的url上加）
 
+- #### GCDWebServer浅析
 	排除Socket类型，业界流行的Objc版针对HTTP开源的WebServer，不外乎年久失修的[CocoaHTTPServer](https://github.com/robbiehanson/CocoaHTTPServer)以及[GCDWebServer](https://github.com/swisspol/GCDWebServer)。GCDWebServer是一个基于GCD的轻量级服务器，简单的四个模块 - Server / Connection / Request / Reponse，以及通过维护LIFO的Handler队列传入业务逻辑生成响应。在排除了基于RFC的Request/Response协议设计之外，关键的代码和流程如下：
 
 	```objc
@@ -459,17 +445,29 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 	```
 	在LocalServer的使用上，也要注意端口的选择[ports used by Apple](https://support.apple.com/en-us/HT202944)，以及前后台切换时suspendInBackground的设置和业务处理。
 
+## 3. Javascript Open Api
 
-- #### 动态更新
-	1. 而对于类似的通用资源下载于更新，我们需要
-	1. 在资源内容发生变化时更改其Url，强制用户下载新资源。通常情况下，可以通过在文件名中嵌入文件的修改时间 & 版本号来实现。
-	2. 离线包：增量更新，
-	3. 签名校验&重试
-	4. url重定向，加时间
+- 随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。所以针对第三方的Web页面，Native需要注册相应的Javascript接口供Web使用。
 
-	<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
-	</center>
+- 当然对于Api需要提供的能力、接口设计和文档规范，不同的业务逻辑和团队代码风格会有不同的定义，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。而脱离Javascript Open Api对外的接口设计和封装，在内部的实现上也有一些通用的关键因素，这里简单列举几个：
+
+	- #### 注入方式和时机
+	
+		对于Javascript文件的注入，最简单的就是将文件打包到项目中，使用WKWebView提供的系统函数进行注入。这种方式无需网络加载，可以合理的选择注入时机，但是无法动态的进行修改和调整。而对于这部分业务需求需要经常调整的App来说，也可以把文件存储到CDN，通过模板替换或者和Web合作者约定，在Web的HTML中通过URL的方式进行加载，这种的方式虽然动态话程度较高，但是需要合作方的配合，同时对于JS Api也不能做到拆分的注入。
+		
+		针对上面的两种方式的不足，一个较为合理的方式是建立资源的动态更新系统（下文具体介绍），同时Javascript文件采用本地注入的方式。这样一方面支持了动态更新，也无需合作方的配合，同时对于不同的业务场景可以拆分不同的Api进行注入，保证安全。
+
+	- #### 安全控制
+
+		对于Javascript Open Api设计实现的另一个重要方面，就是安全性的控制。由于完整的Api需要支持Native登录、Cookies等较为敏感的信息获取，同时也支持一些对UI和体验影响较多的功能如页面跳转、分享等，所以App需要一套权限分级的逻辑控制Web相关的接口调用，保证体验和安全。
+		
+		常规的做法就是在Javascript Open Api建立分级的管理，不同权限的Web页面只能调用各自权限内的接口。客户端通过Domain进行分级，同时支持动态拉取权限Domain白名单，灵活的配置Web页面的权限。在此基础上App内部也可以通过业务逻辑的划分，在Native层面使用不同的容器加载页面，而容器根据业务逻辑的不同，注入不同的JS文件进行权限控制。
+
+<center>
+	<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
+</center>
+# <center>- 其他 -</center>
+
 
 
 
