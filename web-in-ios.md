@@ -1,13 +1,22 @@
 ---
 layout: web-in-ios
 ---
-
 <br>
+> ***
+>_插播广告 —— 几十行代码完成资讯类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对资讯类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+> ***
+
 # <center>- 目录-</center>
-
 <br>
-# <center>- iOS中的Web容器与加载-</center>
-
+<center>
+<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/19.png">
+</center>
+<br>
+# <center>- iOS中Web容器与加载-</center>
+---
 ## 1. iOS中的Web容器
 
 目前iOS系统为开发者提供三种方式来展示Web内容：
@@ -24,22 +33,23 @@ layout: web-in-ios
 
 - #### WKWebView
 
-	在iOS8中，Apple引入了新一代的WebKit framework，同时提供了`WKWebView`用来替代传统的UIWebView。它更加的稳定、拥有60fps滚动刷新率、丰富的手势、KVO、高效的Web和Native通信，默认进度条等等功能，而最重要的，是使用了和safari相同的Nitro引擎极大提升了Javascript的运行速度，以及独立的进程管理，降低了内存占用及Crash对主App的影响。
+	在iOS8中，Apple引入了新一代的WebKit framework，同时提供了`WKWebView`用来替代传统的UIWebView。它更加的稳定、拥有60fps滚动刷新率、丰富的手势、KVO、高效的Web和Native通信，默认进度条等等功能，而最重要的，是使用了和safari相同的Nitro引擎极大提升了Javascript的运行速度。`WKWebView`独立的进程管理，也降低了内存占用及Crash对主App的影响。
 	
 	
 -  #### SFSafariViewController
 
-	在iOS9中，Apple引入了`SFSafariViewController`。其特点就是在App内可以打开一个高度标准化的、和Safari一样展示和特性的页面。同时`SFSafariViewController`可以和Safari共享Cookie和表单数据等等。
+	在iOS9中，Apple引入了`SFSafariViewController`。其特点就是在App内可以打开一个高度标准化的、和Safari一样界面和特性的页面。同时`SFSafariViewController`支持和Safari共享Cookie和表单数据等等。
 
 -  #### Web容器选型
 	
-	对于`SFSafariViewController`：由于其标准化程度之高，使之界面和交互逻辑无法和App统一，基于App的整体体验一般都使用在相对独立的功能和模块中，最常见的就是在App内打开App Store或者广告、游戏推广的页面。
+	对于`SFSafariViewController`：由于其标准化程度之高，使之界面和交互逻辑无法和App统一，基于App的整体体验的考虑，一般都使用在相对独立的功能和模块中，最常见的就是在App内打开App Store或者广告、游戏推广的页面。
 
-	对于`UIWebView/WKWebView`：如果说之前由于NSURLProtocol的问题，好多App都在继续使用UIWebView，那么随着App放弃维护UIWebView（iOS12），全部的App应该会陆续的切换到WKWebView中来。当然，最初WKWebView也为开发者们带来了一些难题，但是随着系统的升级与业务逻辑的适配也逐步的修复，后文会列举几个最为关注的技术点。
+	对于`UIWebView/WKWebView`：如果说之前由于NSURLProtocol的问题，好多App都在继续使用`UIWebView`，那么随着App放弃维护`UIWebView`（iOS12），全部的App应该会陆续的切换到`WKWebView`中来。当然，最初`WKWebView`也为开发者们带来了一些难题，但是随着系统的升级与业务逻辑的适配也逐步的修复，后文会列举几个最为关注的技术点。
 	
+	`UIWebView/WKWebView`对主App内存的影响：
 <center>
-	<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/20.png">
-	<img width="15%" height="15%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/21.png">
+	<img width="35%" height="35%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/20.png">
+	<img width="35%" height="35%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/21.png">
 </center>
 	
 
@@ -47,16 +57,19 @@ layout: web-in-ios
 
 - #### WebKit.framework
 
-	[WebKit](https://webkit.org/)是一个开源的Web浏览器引擎，谈到WebKit开发者常常迷惑于它和WebKit2、Safari、iOS中的framework、以及Chromium等浏览器的关系。
+	[WebKit](https://webkit.org/) 是一个开源的Web浏览器引擎。每当谈到WebKit，开发者常常迷惑于它和WebKit2、Safari、iOS中的framework、以及Chromium等浏览器的关系。
 
-	广义的WebKit其实就是指WebCore，它主要包含了HTML和CSS的解析、布局和定位这类渲染HTML的功能逻辑。而狭义的WebKit就是在WebCore的基础上，不同平台封装Javascript引擎、网络层、GPU相关的技术（WebGL、视频）、绘制渲染技术以及各个平台对应的接口，形成我们可以用的WebView或浏览器，也就是所谓的WebKit Ports。
+	广义的`WebKit`其实就是指`WebCore`，它主要包含了HTML和CSS的解析、布局和定位这类渲染HTML的功能逻辑。而狭义的`WebKit`就是在`WebCore`的基础上，不同平台封装Javascript引擎、网络层、GPU相关的技术（WebGL、视频）、绘制渲染技术以及各个平台对应的接口，形成我们可以用的`WebView`或浏览器，也就是所谓的`WebKit Ports`。
 	
-	比如在Safari中JS的引擎使用JavascriptCore，而Chromium中使用V8；渲染方面Safari使用CoreGraphics，而Chromium中使用Skia；网络方面Safari使用CFNetwork，而Chromium中使用Chromium stack等等。而WebKit2相对于狭义上的WebKit架构而言，主要变化是在API层支持多进程，分离了UI和Web接口的进程，使之通过IPC来进行通讯。
+	<center>
+	<img width="35%" height="35%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/23.png">
+	</center>
 	
-	[图]()
+	比如在`Safari`中 JS的引擎使用`JavascriptCore`，而`Chromium`中使用`V8`；渲染方面`Safari`使用`CoreGraphics`，而`Chromium`中使用`Skia`；网络方面`Safari`使用`CFNetwork`，而`Chromium`中使用`Chromium stack`等等。而`WebKit2`是相对于狭义上的`WebKit`架构而言，主要变化是在API层支持多进程，分离了UI和Web接口的进程，使之通过IPC来进行通讯。
 	
-	对于iOS中的WebKit.framework就是在WebCore、底层桥接、JSCore引擎等核心模块的基础上，针对iOS平台的项目封装。它基于新的WKWebView，提供了一系列浏览特性的设置，以及简单方便的加载回调。而具体类及使用，开发者可以查阅[官方文档](https://developer.apple.com/documentation/webkit)。
-
+	对于iOS中的WebKit.framework就是在WebCore、底层桥接、JSCore引擎等核心模块的基础上，针对iOS平台的项目封装。它基于新的`WKWebView`，提供了一系列浏览特性的设置，以及简单方便的加载回调。而具体类及使用，开发者可以查阅[官方文档](https://developer.apple.com/documentation/webkit)。
+	
+<br>
 <center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
 </center>
@@ -64,13 +77,13 @@ layout: web-in-ios
 
 - #### Web容器使用流程与关键节点
 
-	对于大部分日常使用来说，开发者需要关注的就是WebView的创建、配置、加载、以及系统回调的接收。
+	对于大部分日常使用来说，开发者需要关注的就是`WKWebView`的创建、配置、加载、以及系统回调的接收。
 	
 	<center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/14.png">
 	</center>
 
-	对于Web开发者，业务逻辑一般通过基于Web页面和Dom渲染的关键节点来处理。而对于iOS开发者，WKWebView提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。
+	对于Web开发者，业务逻辑一般通过基于Web页面中Dom渲染的关键节点来处理。而对于iOS开发者，`WKWebView`提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。
 	
 	<center>
 	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
@@ -78,17 +91,17 @@ layout: web-in-ios
 	
 - #### WKWebView常见问题
 
-	使用WKWebView带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法。
+	使用`WKWebView`带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法处理复杂业务逻辑。
 		
 	1. NSURLProtocol
 
-		WKWebView最为显著的改变，就是不支持NSURLProtocol。为了兼容旧的业务逻辑，一部分App通过[WKBrowsingContextController]()中的非公开方法实现了NSURLProtocol。
+		`WKWebView`最为显著的改变，就是不支持NSURLProtocol。为了兼容旧的业务逻辑，一部分App通过[WKBrowsingContextController](https://opensource.apple.com/source/WebKit2/WebKit2-7601.1.46.9/UIProcess/API/Cocoa/WKBrowsingContextController.h.auto.html)中的非公开方法实现了NSURLProtocol。
 		```objc
 		// WKBrowsingContextController
 		+ (void)registerSchemeForCustomProtocol:(NSString *)scheme WK_API_DEPRECATED_WITH_REPLACEMENT("WKURLSchemeHandler", macos(10.10, WK_MAC_TBA), ios(8.0, WK_IOS_TBA));
 		```
 	
-		在iOS11中，系统增加了 `setURLSchemeHandler`函数用来拦截自定义的Scheme。但是不同于UIWebView，新的函数只能拦截自定义的Scheme[(SchemeRegistry.cpp)](https://github.com/WebKit/webkit/blob/master/Source/WebCore/platform/SchemeRegistry.cpp)，对使用最多的HTTP/HTTPS依然不能有效的拦截。
+		在iOS11中，系统增加了 `setURLSchemeHandler`函数用来拦截自定义的Scheme。但是不同于`UIWebView`，新的函数只能拦截自定义的Scheme[(SchemeRegistry.cpp)](https://github.com/WebKit/webkit/blob/master/Source/WebCore/platform/SchemeRegistry.cpp)，对使用最多的HTTP/HTTPS依然不能有效的拦截。
 		```objc
 		//SchemeRegistry
 	    static const StringVectorFunction functions[] {
@@ -103,12 +116,12 @@ layout: web-in-ios
 	
 	2. 白屏
 
-		一般WKWebView白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者通过对比业界也有判断SubView是否包含WKCompsitingView，以及通过随机点截图等方式作为白屏判断的依据。
+		通常`WKWebView`白屏的原因主要分两种，一种是由于Web的进程Crash（多见于内部进程通信）；一种就是WebView渲染时的错误（Debug一切正常只是没有对应的内容）。对于白屏的检测，前者在iOS9之后系统提供了对应Crash的回调函数，同时业界也有通过判断URL/Title是否为空的方式作为辅助；后者业界通过视图树对比，判断SubView是否包含`WKCompsitingView`，以及通过随机点截图等方式作为白屏判断的依据。
 	
 	
 	3. 其他WKWebView的系统级问题如Cookie、POST参数、异步Javascript等等一系列的问题，可以通过业务逻辑的调整重新适配
 	
-	4. 由于WebKit源码等开放性，我们也可以利用私有方法来简化代码逻辑、实现复杂的产品需求。例如在[WKWebViewPrivate](https://github.com/WebKit/webkit/blob/master/Source/WebKit/UIProcess/API/Cocoa/WKWebViewPrivate)中可以获得各种页面信息、直接取到UserAgent、 在[WKBackForwardListPrivate]()中可以清理掉全部的跳转历史、以及在[WKContentViewInteraction]()中替换方法实现自定义的MenuItem等等。
+	4. 由于WebKit源码等开放性，我们也可以利用私有方法来简化代码逻辑、实现复杂的产品需求。例如在[WKWebViewPrivate](https://github.com/WebKit/webkit/blob/master/Source/WebKit/UIProcess/API/Cocoa/WKWebViewPrivate)中可以获得各种页面信息、直接取到UserAgent、 在[WKBackForwardListPrivate](https://github.com/WebKit/webkit/blob/master/Source/WebKit/UIProcess/API/Cocoa/WKBackForwardListPrivate.h)中可以清理掉全部的跳转历史、以及在[WKContentViewInteraction](https://opensource.apple.com/source/WebKit2/WebKit2-7601.1.46.9/UIProcess/ios/WKContentViewInteraction.mm.auto.html)中替换方法实现自定义的MenuItem等等。
 
 		```objc
 		@interface WKWebView (WKPrivate)
@@ -126,9 +139,9 @@ layout: web-in-ios
 
 ## 3. App中的应用场景
 
-WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数从加载的类型上可以分为两类：加载URL & 加载HTML\Data。所以基于此也延伸出两种不同的业务场景：加载URL的**页面直出**类和加载数据的**模板渲染**类，同时两种类型各自也有不同的优化重点及方向。
+`WKWebView`系统提供了四个用于加载渲染Web的函数。这四个函数从加载的类型上可以分为两类：加载URL & 加载HTML\Data。所以基于此也延伸出两种不同的业务场景：加载URL的**页面直出**类和加载数据的**模板渲染**类，同时两种类型各自也有不同的优化重点及方向。
 
-- 页面直出
+- 页面直出类
 
 	```objc
 	//根据URL直接展示Web页面
@@ -136,27 +149,28 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 	```
 	通常各类App中的Web页面加载都是通过加载URL的方式，比如嵌入的运营活动页面、广告页面等等。
 
-- 模板渲染
+- 模板渲染类
 
 	```objc
 	//根据模板&数据渲染Web页面
 	- (nullable WKNavigation *)loadHTMLString:(NSString *)string baseURL:(nullable NSURL *)baseURL;
 	...
 	```
-	需要WebView加载，且交互逻辑较多的页面，最常见的就是新闻类App的内容展示页。
+	需要使用WebView展示，且交互逻辑较多的页面，最常见的就是资讯类App的内容展示页。
 	
 <br>
-# <center>- iOS中的Web与Native的通信 -</center>
+# <center>- iOS中Web与Native的通信 -</center>
+---
 
-单纯的使用Web容器加载页面已经不能满足复杂的功能，开发者希望数据可以在Native和Web之间通信传递来实现复杂的功能，而Javascript就是通信的媒介。对于有WebView的情况，虽然WKWebView提供了系统级的方法，但是大部分App仍然使用基于URLScheme的WebViewBridge用以兼容。而脱离了WebView容器，系统提供了JavaScriptCore的framework，它也为之后蓬勃发展的跨平台和热修复技术提供了可能。
+单纯的使用Web容器加载页面已经不能满足复杂的功能，开发者希望数据可以在Native和Web之间通信传递来实现复杂的功能，而Javascript就是通信的媒介。对于有WebView的情况，虽然`WKWebView`提供了系统级的方法，但是大部分App仍然使用基于URLScheme的WebViewBridge用以兼容`UIWebView`。而脱离了WebView容器，系统提供了`JavaScriptCore`的framework，它也为之后蓬勃发展的跨平台和热修复技术提供了可能。
 
 ## 1. 基于WebView的通信
 
-基于WebView的Web和Native通信主要有 **两个** 途径，一个是通过获取WebView当中的 JSContext，使用系统封装的基于JSCore的函数通信。另一类就是通过创建自定义Scheme的iframe Dom，客户端在回调中进行拦截实现。
+基于WebView的通信主要有 **两个** 途径，一个是通过系统或私有方法，获取WebView当中的 JSContext，使用系统封装的基于JSCore的函数通信。另一类就是通过创建自定义Scheme的iframe Dom，客户端在回调中进行拦截实现。
 
 - #### UIWebView & WKWebView系统级
 
-	在`UIWebView`时代没有提供系统级的函数进行Web与Native的交互，绝大部分App都是通过WebViewJavascriptBridge（下节介绍）来进行的通信。但是由于JavascriptCore的存在，对于UIWebView来说只要有效的获取到内部的JSContext，也可以达到目的。目前已知有效的几个私有方法获取Context的方法如下：
+	在`UIWebView`时代没有提供系统级的函数进行Web与Native的交互，绝大部分App都是通过WebViewJavascriptBridge（下节介绍）来进行的通信。但是由于JavascriptCore的存在，对于`UIWebView`来说只要有效的获取到内部的JSContext，也可以达到目的。目前已知有效的几个私有方法获取Context的方法如下：
 	
 	```objc
 	//通过系统废弃函数获取context
@@ -178,9 +192,9 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 - #### 拦截自定义Scheme请求 - WebViewJavascriptBridge
 
-	由于私有方法的稳定性与审核风险，开发者不愿意使用上文提到的UIWebView获取 JSContext的方式进行通信，所以通常都采用基于iframe和自定义Scheme的 JavascriptBridge进行通信。虽然在之后的WKWebView提供了系统函数，但是大部分App都需要兼容UIWebView与WKWebView，所以目前的使用范围仍然十分广泛。
+	由于私有方法的稳定性与审核风险，开发者不愿意使用上文提到的`UIWebView`获取 JSContext的方式进行通信，所以通常都采用基于iframe和自定义Scheme的 JavascriptBridge进行通信。虽然在之后的`WKWebView`提供了系统函数，但是大部分App都需要兼容`UIWebView`与`WKWebView`，所以目前的使用范围仍然十分广泛。
 	
-	在Github中类似的开源框架有很多，但是无外乎都是Web侧根据固定的格式创建包含通信信息的Request，之后创建隐式iFrame节点请求；Native侧在相应的WebView回调用解析Request的Scheme，之后按照格式解析数据并处理。
+	在Github中类似的开源框架有很多，但是无外乎都是Web侧根据固定的格式创建包含通信信息的Request，之后创建隐式iFrame节点请求；Native侧在相应的WebView回调中解析Request的Scheme，之后按照格式解析数据并处理。
 	
 	而对于数据传递和回调处理的问题，在兼容两种WebView、持续的更新的[WebViewJavascriptBridge](https://github.com/marcuswestin/WebViewJavascriptBridge)中，iFrame request没有直接传递数据，而是Web和Native侧维护共同的参数或回调Queue，Native通过Request中Scheme的解析触发对Queue里数据的读取。
 	
@@ -191,12 +205,13 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 ## 2. 脱离WebView的通信 JavaScriptCore
 
-- #### JavascriptCore原理浅析
+- #### JavascriptCore
 
-	- JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，Apple对原有的C/C++代码进行了OC的封装，成系统级的framework供开发者使用。作为一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向，由于篇幅的限制暂且不做深入的讨论。
+	JavascriptCore一直作为WebKit中内置的JS引擎使用，在iOS7之后，Apple对原有的C/C++代码进行了OC的封装，成系统级的framework供开发者使用。作为一个引擎来讲，JavascriptCore的词法、语法分析，以及多层次的JIT编译技术都是值得深入挖掘和学习的方向，由于篇幅的限制暂且不做深入的讨论。
 
-	词法分析 语法分析 字节码生成
-	[图](*******)
+<center>
+<img width="25%" height="25%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/24.png">
+</center>
 
 - #### JavascriptCore.framework
 
@@ -258,6 +273,7 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 <br>
 # <center>- 跨平台与热修复 -</center>
+---
 
 近几年来国内外移动端各种方案如雨后春笋般涌现，“Write once, run anywhere”不再是开发者的向往。剥离跨平台技术在Web侧DSL、virtualDom等方面的优化，以及Native侧Runtime的应用与封装，对于两端通信的核心，依然是JavascriptCore。
 
@@ -325,6 +341,7 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 <br>
 # <center>- iOS中Web相关优化策略 -</center>
+---
 
 随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
 
@@ -388,7 +405,7 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 
 <br>
 # <center>- iOS中Web相关延伸业务 -</center>
-
+---
 
 
 ## 1. 模板引擎
@@ -477,6 +494,12 @@ WKWebView系统提供了四个用于加载渲染Web的函数。这四个函数�
 </center>
 # <center>- 其他 -</center>
 
+> ***
+>_插播广告 —— 几十行代码完成资讯类App多种形式内容页_ 
+>
+>_[HybridPageKit](https://github.com/dequan1331/HybridPageKit) ：一个针对资讯类App高性能、易扩展、组件化的通用内容页实现框架。_
+>
+> ***
 
 
 
