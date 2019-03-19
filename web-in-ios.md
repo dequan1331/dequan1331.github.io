@@ -344,6 +344,7 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
 
+这一章节更为详细的设计与实现，请移步[iOS新闻类App内容页技术探索](./hybrid-page-kit.html);
 
 ## 1. 不同业务场景的优化策略
 
@@ -359,15 +360,11 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 - #### 通用Web优化
 	 
-	 压缩资源文件，减少页面CSS/JS的逻辑，采用HTTP缓存
-	 
-- #### 离线包
+	 对于Web的通用优化方案，一般来说在网络层面，可以通过DNS和CDN技术减少网络延迟、通过各种HTTP缓存技术减少网络请求次数、通过资源压缩和合并减少请求内容等。在渲染层面可以通过精简和优化业务代码、按需加载、防止阻塞、调整加载顺序优化等等。对于这个老生常谈的问题，业内已经有十分成熟和完整的总结，例如[Best Practices for Speeding Up Your Web Site](https://developer.yahoo.com/performance/rules.html?guce_referrer=aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTA2NDg1NTUvYXJ0aWNsZS9kZXRhaWxzLzUwNzIxNzUx&guce_referrer_sig=AQAAALFDmgeec4o4M3qDGMF4pJ7mfwbrvNzWRSoHOuVgUBMqfpOi8fCJWX9_zYqnLeQlvhGa39OdzymsPP-4C5wB0XqzU7oux3SZqBfbgoNOrf_ScV24a05ZfBxcwZ7oQaG8nrdgAAjNCKhFRAwQu18yQdsMJuY1M_CReqF8_dbbZJlV&guccounter=1)，在这里暂不做深入的展开。
 
-	由于Web页面内请求的不可控以及网络环境的影响，为了提升Web的加载响应速度，无论是直出类型还是渲染类型的Web页面都把部分资源打包到了Native本地，或是选择合适的时机由Native优先下载。这些提前下载的资源（HTML模板、JS文件、CSS文件、占位图片）在Web中称为离线包。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。
-	
 - #### 其他
 	
-	脱离较为通用的优化，在对代码侵入宽容度较高的场景中，开发者对Web优化有着更为激进的做法。例如在[VasSonic](https://github.com/Tencent/VasSonic)中，
+	脱离较为通用的优化，在对代码侵入宽容度较高的场景中，开发者对Web优化有着更为激进的做法。例如在[VasSonic](https://github.com/Tencent/VasSonic)中，除了Web容器复用、数据分离预拉取和通用的优化方式外，通过自定义VasSonic标签将HTML页面进行划分，分段进行缓存控制。
 	
 
 ## 3. Native维度的优化
@@ -382,12 +379,14 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 	针对这种情况，业界主流的做法就是复用 & 预热。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。
 
-- #### Native接管资源请求
-	
-	替代Web内核的资源加载，可以做到并行加载
+- #### Native并行资源请求 & 离线包
+
+	由于Web页面内请求流程不可控以及网络环境的影响，对于Web的加载来说，网络请求一直是优化的重点。开发者较为常用的做法是使用Native并行代理数据请求，替代Web内核的资源加载。在客户端初始化页面的同时，并行开始网络请求数据；当Web页面渲染时向Native获取其代理请求的数据。	
+	而将并行加载和预加载做到极致的优化，就是离线包的使用。将常用的需要下载资源（HTML模板、JS文件、CSS文件、占位图片）打包，App选择合适的时机全部下载到本地，当Web页面渲染时向Native获取其数据。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。当然对于离线包来说，合理的下载时机、增量更新、加密和校验等方面都是需要进行设计和思考的方向。
 
 - #### 替换任意标签Native实现，地图、音视频
 
+	
 	<center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
 	</center>
