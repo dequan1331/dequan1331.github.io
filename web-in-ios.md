@@ -65,14 +65,13 @@ layout: web-in-ios
 	广义的`WebKit`其实就是指`WebCore`，它主要包含了HTML和CSS的解析、布局和定位这类渲染HTML的功能逻辑。而狭义的`WebKit`就是在`WebCore`的基础上，不同平台封装Javascript引擎、网络层、GPU相关的技术（WebGL、视频）、绘制渲染技术以及各个平台对应的接口，形成我们可以用的`WebView`或浏览器，也就是所谓的`WebKit Ports`。
 	
 	<center>
-	<img width="35%" height="35%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/23.png">
+	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/23.png">
 	</center>
 	
 	比如在`Safari`中 JS的引擎使用`JavascriptCore`，而`Chromium`中使用`V8`；渲染方面`Safari`使用`CoreGraphics`，而`Chromium`中使用`Skia`；网络方面`Safari`使用`CFNetwork`，而`Chromium`中使用`Chromium stack`等等。而`WebKit2`是相对于狭义上的`WebKit`架构而言，主要变化是在API层支持多进程，分离了UI和Web接口的进程，使之通过IPC来进行通讯。
 	
 	对于iOS中的WebKit.framework就是在WebCore、底层桥接、JSCore引擎等核心模块的基础上，针对iOS平台的项目封装。它基于新的`WKWebView`，提供了一系列浏览特性的设置，以及简单方便的加载回调。而具体类及使用，开发者可以查阅[官方文档](https://developer.apple.com/documentation/webkit)。
-	
-<br>
+
 <center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/4.png">
 </center>
@@ -89,9 +88,9 @@ layout: web-in-ios
 	对于Web开发者，业务逻辑一般通过基于Web页面中Dom渲染的关键节点来处理。而对于iOS开发者，`WKWebView`提供的的注册、加载和回调时机，没有明确的与Web加载的关键节点相关联。准确的理解和处理两个维度的加载顺序，选择合理的业务逻辑处理时机，才可以实现准确而高效的应用。
 	
 	<center>
-	<img width="70%" height="70%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
+	<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/5.png">
 	</center>
-	
+	<br>
 - #### WKWebView常见问题
 
 	使用`WKWebView`带来的另外一个好处，就是我们可以通过源码理解部分加载逻辑，为Crash提供一些思路，或者使用一些私有方法处理复杂业务逻辑。
@@ -192,7 +191,7 @@ layout: web-in-ios
 	//Native在回调中接收
 	- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message;
 	```
-
+<br>
 - #### 拦截自定义Scheme请求 - WebViewJavascriptBridge
 
 	由于私有方法的稳定性与审核风险，开发者不愿意使用上文提到的`UIWebView`获取 JSContext的方式进行通信，所以通常都采用基于iframe和自定义Scheme的 JavascriptBridge进行通信。虽然在之后的`WKWebView`提供了系统函数，但是大部分App都需要兼容`UIWebView`与`WKWebView`，所以目前的使用范围仍然十分广泛。
@@ -350,7 +349,7 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 对于单纯的Web页面来说，业界早已有了合理的优化方向以及成熟的优化方案，而对于移动客户端中的Web来说，开发者在进行单一的Web优化同时，还可以通过优化Web容器以及Web页面中数据加载方式等多个途径做出优化。
 
-所以对于iOS开发中的优化来说，就是通过Native和Web两个维度的优化关键渲染路径，保证WebView优先渲染完毕。由此我们梳理了内容页整体的加载顺序，从中找出关键渲染路径，继而逐个分析、优化。
+所以对于iOS开发中的优化来说，就是通过Native和Web两个维度的优化关键渲染路径，保证WebView优先渲染完毕。由此我们梳理了常规Web页面整体的加载顺序，从中找出关键渲染路径，继而逐个分析、优化。
 
 <center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/18.png">
@@ -374,29 +373,34 @@ _jsContext[@"callNative"] = callNativeBlock;
 	WKWebView虽然JIT大幅优化了JS的执行速度，但是单纯的加载渲染HTML，WKWebView比UIWebView慢了很多。根据渲染的不同阶段分别对耗时进行测试，同时对比UIWebView，我们发现WKWebView在初始化及渲染开始前的耗时较多。
 
 	<center>
-	<img width="45%" height="45%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
+	<img width="55%" height="55%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
 	</center>
 
-	针对这种情况，业界主流的做法就是复用 & 预热。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。
+	针对这种情况，业界主流的做法就是复用 & 预热。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中，就提供了易于集成的完整WKWebView重用机制实现。
+
 
 - #### Native并行资源请求 & 离线包
 
 	由于Web页面内请求流程不可控以及网络环境的影响，对于Web的加载来说，网络请求一直是优化的重点。开发者较为常用的做法是使用Native并行代理数据请求，替代Web内核的资源加载。在客户端初始化页面的同时，并行开始网络请求数据；当Web页面渲染时向Native获取其代理请求的数据。	
-	而将并行加载和预加载做到极致的优化，就是离线包的使用。将常用的需要下载资源（HTML模板、JS文件、CSS文件、占位图片）打包，App选择合适的时机全部下载到本地，当Web页面渲染时向Native获取其数据。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响。当然对于离线包来说，合理的下载时机、增量更新、加密和校验等方面都是需要进行设计和思考的方向。
+	
+	而将并行加载和预加载做到极致的优化，就是离线包的使用。将常用的需要下载资源（HTML模板、JS文件、CSS文件、占位图片）打包，App选择合适的时机全部下载到本地，当Web页面渲染时向Native获取其数据。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响，提高了页面的加载速度和成功率。当然离线包作为资源动态更新的一个方式，合理的下载时机、增量更新、加密和校验等方面都是需要进行设计和思考的方向，后文会简单介绍。
 
 - #### 替换任意标签Native实现，地图、音视频
 
+	当并行请求资源，客户端代理数据请求的技术方案逐渐成熟时，由于WKWebView的限制，开发者不得不面对业务调整和适配。其中保留原有代理逻辑、采用LocalServer的方式最为普遍。但是由于WKWebView的进程间通信、LocalServer Socket建立与连接、资源的重复编解码都影响了代理请求的效率。
 	
 	<center>
 	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
 	</center>
+	
+	所以对于一些资讯类App，通常采用Native的方式实现复杂节点，如图片、地图、音视频等模块。这样不但能减少通信和请求的建立、提供更加友好的交互、也能并行的进行View的渲染和处理，减少Web页面的业务逻辑。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中就提供封装好的功能框架。
 
 - #### 按优先级划分业务逻辑
 
 	从App的维度上看，一个Web页面从入口点击到渲染完成，或多或少都会有Native的业务逻辑并行执行。所以这个角度的优化关键渲染路径，就是优先保证WebView以及其他在首屏直接展示的Native模块优先渲染。所以承载Web页面的Native容器，可以根据业务逻辑的优先级，在保证WebView模块展示之后，选择合适的时机进行数据加载、视图渲染等。这样就能保证在内容页的维度上，关键路径优先渲染。
 	
 	<center>
-	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/17.png">
+	<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/17.png">
 	</center>
 
 ## 4. 优化整体流程
@@ -404,7 +408,7 @@ _jsContext[@"callNative"] = callNativeBlock;
 所以整体上对于客户端来说，我们可以从Native维度（容器和数据加载）以及Web维度两个方向提升加载速度，按照页面的加载流程，整体的优化方向如下：
 
 <center>
-	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/16.png">
+	<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/16.png">
 </center>
 
 <br>
@@ -427,29 +431,25 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 ## 2. 资源动态更新和管理
 
-无论是离线包、本地注入的JS、CSS文件、以及Web中的默认图片，目的都是通过打包或提前下载，替换网络请求为本地读取来优化Web的加载体验。而对于这些资源的管理，开发者需要从合理的下载与更新，以及Web中合理的访问这两个方面进行设计。
+无论是离线包、本地注入的JS、CSS文件、以及Web中的默认图片，目的都是通过打包或提前下载，替换网络请求为本地读取来优化Web的加载体验和成功率。而对于这些资源的管理，开发者需要从合理的下载与更新，以及Web中合理的访问这两个方面进行设计。
 
 - #### 下载与更新
 	
-	1. 而对于类似的通用资源下载于更新，我们需要
-	1. 在资源内容发生变化时更改其Url，强制用户下载新资源。通常情况下，可以通过在文件名中嵌入文件的修改时间 & 版本号来实现。
-	2. 离线包：增量更新，
-	3. 签名校验&重试
-	4. url重定向，加时间
-
-	<center>
-	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
-	</center>
-
+	下载与重试：对于资源或是离线包的下载，选择合适的时机、失败重载时机、失败重载次数都要根据业务灵活调整。通常为了增加成功率和及时更新，在冷启动、前后台切换、关键的操作节点，或者采用定时轮循的方式，都需要进行资源版本号或MD5的判断，用以触发下载逻辑。当然对于服务端来说，合理的灰度控制，也是保证业务稳定的重要途径。
+	
+	签名校验：对于动态下载的资源，我们都需要将原文件的签名进行校验，防止在传输过程中被篡改。对于单项加密的办法就是双端对数据进行MD5的加密，之后客户端校验MD5是否符合预期；而双向加密可以采用DES等加密算法，客户端使用公钥对资源验证使用。
+	
+	增量更新：为了减少资源和离线包的重复下载，业内大部分使用离线包的场景都采用了增量更新的方式。即客户端在触发请求资源时，带上本地已存在资源的标示，服务端根据标示和最新资源做对比，之后只提供新增或修改的Patch供客户端下载。
 
 - #### 基于LocalServer的访问
 
-	离线包自身的下载业务，需要考虑下载时机、是否采用增量下载、校验等等通用的问题。而对于已经下载好的离线包，如何将Web请求重定向到本地，大部分App都依赖于NSURLProtocol。上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。开发者可以通过集成LocalServer，接管部分Web请求，从而达到访问本地资源的目的，同时LocalServer的引入还可以为我们自定义HTTP缓存提供基础。
-
-	对于Web网络请求的资源来说，通过HTTP的缓存策略可以减少通信，提升加载速度。而对于本地的样式文件、JS注入文件、默认图片等资源，频繁的读取磁盘也在一定程度上影响了资源加载速度。（离线包）
-	为了解决WKWebView中NSURLProtocol的问题，
-	同时，离线包的使用是将需要下载的网络资源优化成了本地读取。而本地读取的资源，为了减少I/O，进一步优化性能，部分App集成了LocalServer，通过将本地资源封装成Response，利用HTTP的缓存技术，进一步的优化了读取的时间和性能。可以在App中内置WebServer，将读取本地资源文件变成本地服务器的请求，这样就能扩展资源数据为Response，通过HTTP缓存技术实现层次化的缓存结构。（直接在file的url上加）
-
+	离线包自身的下载业务，需要考虑下载时机、是否采用增量下载、校验等等通用的问题。而对于已经下载好的离线包，如何将Web请求重定向到本地，大部分App都依赖于NSURLProtocol。上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。目前业界一部分App，都采用了集成LocalServer的方式，接管部分Web请求，从而达到访问本地资源的目的。同时集成了LocalServer，通过将本地资源封装成Response，利用HTTP的缓存技术，进一步的优化了读取的时间和性能，实现层次化的缓存结构。	
+	而使用了本地资源的HTTP缓存，就需要考虑缓存的控制和过期时间。通常可以通过在URL上增加本地文件的修改时间、或本地文件的MD5来确保缓存的有效性。
+	
+	<center>
+	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
+	</center>
+	
 - #### GCDWebServer浅析
 	排除Socket类型，业界流行的Objc版针对HTTP开源的WebServer，不外乎年久失修的[CocoaHTTPServer](https://github.com/robbiehanson/CocoaHTTPServer)以及[GCDWebServer](https://github.com/swisspol/GCDWebServer)。GCDWebServer是一个基于GCD的轻量级服务器，简单的四个模块 - Server / Connection / Request / Reponse，以及通过维护LIFO的Handler队列传入业务逻辑生成响应。在排除了基于RFC的Request/Response协议设计之外，关键的代码和流程如下：
 
