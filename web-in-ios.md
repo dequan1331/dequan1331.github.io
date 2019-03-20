@@ -341,7 +341,7 @@ _jsContext[@"callNative"] = callNativeBlock;
 # <center>- iOS中Web相关优化策略 -</center>
 ---
 
-随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，首屏展示速度——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
+随着Web技术的不断升级以及App动态性业务需求的增多，越来越多的Web页面加入到了iOS App当中。与之对应的，`首屏展示速度`——这个对于移动客户端Web的最重要体验优化，也成为了移动客户端中Web业务最重要的优化方向。
 
 这一章节更为详细的设计与实现，请移步[iOS新闻类App内容页技术探索](./hybrid-page-kit.html);
 
@@ -359,11 +359,11 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 - #### 通用Web优化
 	 
-	 对于Web的通用优化方案，一般来说在网络层面，可以通过DNS和CDN技术减少网络延迟、通过各种HTTP缓存技术减少网络请求次数、通过资源压缩和合并减少请求内容等。在渲染层面可以通过精简和优化业务代码、按需加载、防止阻塞、调整加载顺序优化等等。对于这个老生常谈的问题，业内已经有十分成熟和完整的总结，例如[Best Practices for Speeding Up Your Web Site](https://developer.yahoo.com/performance/rules.html?guce_referrer=aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTA2NDg1NTUvYXJ0aWNsZS9kZXRhaWxzLzUwNzIxNzUx&guce_referrer_sig=AQAAALFDmgeec4o4M3qDGMF4pJ7mfwbrvNzWRSoHOuVgUBMqfpOi8fCJWX9_zYqnLeQlvhGa39OdzymsPP-4C5wB0XqzU7oux3SZqBfbgoNOrf_ScV24a05ZfBxcwZ7oQaG8nrdgAAjNCKhFRAwQu18yQdsMJuY1M_CReqF8_dbbZJlV&guccounter=1)，在这里暂不做深入的展开。
+	 对于Web的通用优化方案，一般来说在网络层面，可以通过DNS和CDN技术减少网络延迟、通过各种HTTP缓存技术减少网络请求次数、通过资源压缩和合并减少请求内容等。在渲染层面可以通过精简和优化业务代码、按需加载、防止阻塞、调整加载顺序优化等等。对于这个老生常谈的问题，业内已经有十分成熟和完整的总结，例如[《Best Practices for Speeding Up Your Web Site》](https://developer.yahoo.com/performance/rules.html?guce_referrer=aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTA2NDg1NTUvYXJ0aWNsZS9kZXRhaWxzLzUwNzIxNzUx&guce_referrer_sig=AQAAALFDmgeec4o4M3qDGMF4pJ7mfwbrvNzWRSoHOuVgUBMqfpOi8fCJWX9_zYqnLeQlvhGa39OdzymsPP-4C5wB0XqzU7oux3SZqBfbgoNOrf_ScV24a05ZfBxcwZ7oQaG8nrdgAAjNCKhFRAwQu18yQdsMJuY1M_CReqF8_dbbZJlV&guccounter=1)，已经有了很好的整理和总结。
 
 - #### 其他
 	
-	脱离较为通用的优化，在对代码侵入宽容度较高的场景中，开发者对Web优化有着更为激进的做法。例如在[VasSonic](https://github.com/Tencent/VasSonic)中，除了Web容器复用、数据分离预拉取和通用的优化方式外，通过自定义VasSonic标签将HTML页面进行划分，分段进行缓存控制。
+	脱离较为通用的优化，在对代码侵入宽容度较高的场景中，开发者对Web优化有着更为激进的做法。例如在[VasSonic](https://github.com/Tencent/VasSonic)中，除了Web容器复用、数据模板分离、预拉取和通用的优化方式外，还通过自定义VasSonic标签将HTML页面进行划分，分段进行缓存控制，以达到更高的优化效果。
 	
 
 ## 3. Native维度的优化
@@ -376,28 +376,34 @@ _jsContext[@"callNative"] = callNativeBlock;
 	<img width="55%" height="55%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/22.png">
 	</center>
 
-	针对这种情况，业界主流的做法就是复用 & 预热。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中，就提供了易于集成的完整WKWebView重用机制实现。
+	针对这种情况，业界主流的做法就是`复用 & 预热`。预热即时在App启动时创建一个WKWebView，使其内部部分逻辑预热已提升加载速度。而复用又分为两种，较为复杂的是处理边界条件已达到真正的复用，还有一种较为Triky的办法就是常驻一个空WKWebView在内存。
+	
+	[HybridPageKit](https://github.com/dequan1331/HybridPageKit)提供了易于集成的完整WKWebView重用机制实现,开发者可以无需关注复用细节，无缝的体验更为高效的WKWebView。
 
 
 - #### Native并行资源请求 & 离线包
 
 	由于Web页面内请求流程不可控以及网络环境的影响，对于Web的加载来说，网络请求一直是优化的重点。开发者较为常用的做法是使用Native并行代理数据请求，替代Web内核的资源加载。在客户端初始化页面的同时，并行开始网络请求数据；当Web页面渲染时向Native获取其代理请求的数据。	
 	
-	而将并行加载和预加载做到极致的优化，就是离线包的使用。将常用的需要下载资源（HTML模板、JS文件、CSS文件、占位图片）打包，App选择合适的时机全部下载到本地，当Web页面渲染时向Native获取其数据。通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响，提高了页面的加载速度和成功率。当然离线包作为资源动态更新的一个方式，合理的下载时机、增量更新、加密和校验等方面都是需要进行设计和思考的方向，后文会简单介绍。
+	而将并行加载和预加载做到极致的优化，就是离线包的使用。将常用的需要下载资源（HTML模板、JS文件、CSS文件、占位图片）打包，App选择合适的时机全部下载到本地，当Web页面渲染时向Native获取其数据。
+	
+	通过离线包的使用，Web页面可以并行（提前）加载页面资源，同时摆脱了网络的影响，提高了页面的加载速度和成功率。当然离线包作为资源动态更新的一个方式，合理的下载时机、增量更新、加密和校验等方面都是需要进行设计和思考的方向，后文会简单介绍。
 
-- #### 替换任意标签Native实现，地图、音视频
+- #### 复杂Dom节点Native化实现
 
 	当并行请求资源，客户端代理数据请求的技术方案逐渐成熟时，由于WKWebView的限制，开发者不得不面对业务调整和适配。其中保留原有代理逻辑、采用LocalServer的方式最为普遍。但是由于WKWebView的进程间通信、LocalServer Socket建立与连接、资源的重复编解码都影响了代理请求的效率。
 	
 	<center>
-	<img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
+	<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/15.png">
 	</center>
 	
-	所以对于一些资讯类App，通常采用Native的方式实现复杂节点，如图片、地图、音视频等模块。这样不但能减少通信和请求的建立、提供更加友好的交互、也能并行的进行View的渲染和处理，减少Web页面的业务逻辑。在[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中就提供封装好的功能框架。
+	所以对于一些资讯类App，通常采用Dom节点占位、Native渲染实现的方式进行优化，如图片、地图、音视频等模块。这样不但能减少通信和请求的建立、提供更加友好的交互、也能并行的进行View的渲染和处理，同时减少Web页面的业务逻辑。
+	
+	[HybridPageKit](https://github.com/dequan1331/HybridPageKit)中就提供封装好的功能框架，开发者可以简单的替换Dom节点为NativeView。
 
 - #### 按优先级划分业务逻辑
 
-	从App的维度上看，一个Web页面从入口点击到渲染完成，或多或少都会有Native的业务逻辑并行执行。所以这个角度的优化关键渲染路径，就是优先保证WebView以及其他在首屏直接展示的Native模块优先渲染。所以承载Web页面的Native容器，可以根据业务逻辑的优先级，在保证WebView模块展示之后，选择合适的时机进行数据加载、视图渲染等。这样就能保证在内容页的维度上，关键路径优先渲染。
+	从App的维度上看，一个Web页面从入口点击到渲染完成，或多或少都会有Native的业务逻辑并行执行。所以这个角度的优化关键渲染路径，就是优先保证WebView以及其他在首屏直接展示的Native模块优先渲染。所以承载Web页面的Native容器，可以根据业务逻辑的优先级，在保证WebView模块展示之后，选择合适的时机进行数据加载、视图渲染等。这样就能保证在Native的维度上，关键路径优先渲染。
 	
 	<center>
 	<img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/17.png">
@@ -431,25 +437,26 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 ## 2. 资源动态更新和管理
 
-无论是离线包、本地注入的JS、CSS文件、以及Web中的默认图片，目的都是通过打包或提前下载，替换网络请求为本地读取来优化Web的加载体验和成功率。而对于这些资源的管理，开发者需要从合理的下载与更新，以及Web中合理的访问这两个方面进行设计。
+无论是离线包、本地注入的JS、CSS文件、以及本地化Web中的默认图片，目的都是通过提前下载，替换网络请求为本地读取来优化Web的加载体验和成功率。而对于这些资源的管理，开发者需要从下载与更新，以及Web中的访问这两个方面进行设计优化。
 
 - #### 下载与更新
 	
-	下载与重试：对于资源或是离线包的下载，选择合适的时机、失败重载时机、失败重载次数都要根据业务灵活调整。通常为了增加成功率和及时更新，在冷启动、前后台切换、关键的操作节点，或者采用定时轮循的方式，都需要进行资源版本号或MD5的判断，用以触发下载逻辑。当然对于服务端来说，合理的灰度控制，也是保证业务稳定的重要途径。
+	- 下载与重试：对于资源或是离线包的下载，选择合适的时机、失败重载时机、失败重载次数都要根据业务灵活调整。通常为了增加成功率和及时更新，在冷启动、前后台切换、关键的操作节点，或者采用定时轮循的方式，都需要进行资源版本号或MD5的判断，用以触发下载逻辑。当然对于服务端来说，合理的灰度控制，也是保证业务稳定的重要途径。
 	
-	签名校验：对于动态下载的资源，我们都需要将原文件的签名进行校验，防止在传输过程中被篡改。对于单项加密的办法就是双端对数据进行MD5的加密，之后客户端校验MD5是否符合预期；而双向加密可以采用DES等加密算法，客户端使用公钥对资源验证使用。
+	- 签名校验：对于动态下载的资源，我们都需要将原文件的签名进行校验，防止在传输过程中被篡改。对于单项加密的办法就是双端对数据进行MD5的加密，之后客户端校验MD5是否符合预期；而双向加密可以采用DES等加密算法，客户端使用公钥对资源验证使用。
 	
-	增量更新：为了减少资源和离线包的重复下载，业内大部分使用离线包的场景都采用了增量更新的方式。即客户端在触发请求资源时，带上本地已存在资源的标示，服务端根据标示和最新资源做对比，之后只提供新增或修改的Patch供客户端下载。
+	- 增量更新：为了减少资源和离线包的重复下载，业内大部分使用离线包的场景都采用了增量更新的方式。即客户端在触发请求资源时，带上本地已存在资源的标示，服务端根据标示和最新资源做对比，之后只提供新增或修改的Patch供客户端下载。
 
 - #### 基于LocalServer的访问
 
-	离线包自身的下载业务，需要考虑下载时机、是否采用增量下载、校验等等通用的问题。而对于已经下载好的离线包，如何将Web请求重定向到本地，大部分App都依赖于NSURLProtocol。上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。目前业界一部分App，都采用了集成LocalServer的方式，接管部分Web请求，从而达到访问本地资源的目的。同时集成了LocalServer，通过将本地资源封装成Response，利用HTTP的缓存技术，进一步的优化了读取的时间和性能，实现层次化的缓存结构。	
-	而使用了本地资源的HTTP缓存，就需要考虑缓存的控制和过期时间。通常可以通过在URL上增加本地文件的修改时间、或本地文件的MD5来确保缓存的有效性。
+	在完成资源的下载与更新后，如何将Web请求重定向到本地，大部分App都依赖于NSURLProtocol。上文提到在WKWebView中虽然可以使用私有函数实现（或者iOS11+提供系统函数），但是仍然有许多问题。
+	
+	目前业界一部分App，都采用了集成LocalServer的方式，接管部分Web请求，从而达到访问本地资源的目的。同时集成了LocalServer，通过将本地资源封装成Response，利用HTTP的缓存技术，进一步的优化了读取的时间和性能，实现层次化的缓存结构。而使用了本地资源的HTTP缓存，就需要考虑缓存的控制和过期时间。通常可以通过在URL上增加本地文件的修改时间、或本地文件的MD5来确保缓存的有效性。
 	
 	<center>
 	<img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/11.png">
 	</center>
-	
+	<br>
 - #### GCDWebServer浅析
 	排除Socket类型，业界流行的Objc版针对HTTP开源的WebServer，不外乎年久失修的[CocoaHTTPServer](https://github.com/robbiehanson/CocoaHTTPServer)以及[GCDWebServer](https://github.com/swisspol/GCDWebServer)。GCDWebServer是一个基于GCD的轻量级服务器，简单的四个模块 - Server / Connection / Request / Reponse，以及通过维护LIFO的Handler队列传入业务逻辑生成响应。在排除了基于RFC的Request/Response协议设计之外，关键的代码和流程如下：
 
@@ -478,21 +485,21 @@ _jsContext[@"callNative"] = callNativeBlock;
 
 ## 3. Javascript Open Api
 
-- 随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑如拍照、音视频、蓝牙、定位等，同时App内需要统一的登录态，统一的分享逻辑以及支付逻辑等。所以针对第三方的Web页面，Native需要注册相应的Javascript接口供Web使用。
+- 随着App业务的不断发展，单纯的Web加载与渲染无法满足复杂的交互逻辑，如拍照、音视频、蓝牙、定位等，同时App内也需要统一的登录态，统一的分享逻辑以及支付逻辑等。所以针对第三方的Web页面，Native需要注册相应的 Javascript接口供Web使用。
 
-- 当然对于Api需要提供的能力、接口设计和文档规范，不同的业务逻辑和团队代码风格会有不同的定义，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。而脱离Javascript Open Api对外的接口设计和封装，在内部的实现上也有一些通用的关键因素，这里简单列举几个：
+- 对于Api需要提供的能力、接口设计和文档规范，不同的业务逻辑和团队代码风格会有不同的定义，[微信JS-SDK说明文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115) 就是一个很好的例子。而脱离Javascript Open Api对外的接口设计和封装，在内部的实现上也有一些通用的关键因素，这里简单列举几个：
 
 	- #### 注入方式和时机
 	
-		对于Javascript文件的注入，最简单的就是将文件打包到项目中，使用WKWebView提供的系统函数进行注入。这种方式无需网络加载，可以合理的选择注入时机，但是无法动态的进行修改和调整。而对于这部分业务需求需要经常调整的App来说，也可以把文件存储到CDN，通过模板替换或者和Web合作者约定，在Web的HTML中通过URL的方式进行加载，这种的方式虽然动态话程度较高，但是需要合作方的配合，同时对于JS Api也不能做到拆分的注入。
+		对于Javascript文件的注入，最简单的就是将JS文件打包到项目中，使用WKWebView提供的系统函数进行注入。这种方式无需网络加载，可以合理的选择注入时机，但是无法动态的进行修改和调整。而对于这部分业务需求需要经常调整的App来说，也可以把文件存储到CDN，通过模板替换或者和Web合作者约定，在Web的HTML中通过URL的方式进行加载，这种的方式虽然动态化程度较高，但是需要合作方的配合，同时对于JS Api也不能做到拆分的注入。
 		
-		针对上面的两种方式的不足，一个较为合理的方式是建立资源的动态更新系统（下文具体介绍），同时Javascript文件采用本地注入的方式。这样一方面支持了动态更新，也无需合作方的配合，同时对于不同的业务场景可以拆分不同的Api进行注入，保证安全。
+		针对上面的两种方式的优点不足，一个较为合理的方式是Javascript文件采用本地注入的方式，同时建立资源的动态更新系统（上文）。这样一方面支持了动态更新，同时也无需合作方的配合，对于不同的业务场景也可以拆分不同的Api进行注入，保证安全。
 
 	- #### 安全控制
 
 		对于Javascript Open Api设计实现的另一个重要方面，就是安全性的控制。由于完整的Api需要支持Native登录、Cookies等较为敏感的信息获取，同时也支持一些对UI和体验影响较多的功能如页面跳转、分享等，所以App需要一套权限分级的逻辑控制Web相关的接口调用，保证体验和安全。
 		
-		常规的做法就是在Javascript Open Api建立分级的管理，不同权限的Web页面只能调用各自权限内的接口。客户端通过Domain进行分级，同时支持动态拉取权限Domain白名单，灵活的配置Web页面的权限。在此基础上App内部也可以通过业务逻辑的划分，在Native层面使用不同的容器加载页面，而容器根据业务逻辑的不同，注入不同的JS文件进行权限控制。
+		常规的做法就是对 Javascript Open Api建立分级的管理，不同权限的Web页面只能调用各自权限内的接口。客户端通过Domain进行分级，同时支持动态拉取权限Domain白名单，灵活的配置Web页面的权限。在此基础上App内部也可以通过业务逻辑的划分，在Native层面使用不同的容器加载页面，而容器根据业务逻辑的不同，注入不同的JS文件进行Api权限控制。
 
 <center>
 	<img width="30%" height="30%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/2/12.png">
