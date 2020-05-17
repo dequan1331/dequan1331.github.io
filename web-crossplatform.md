@@ -54,6 +54,8 @@ layout: web-crossplatform
 <center>
 <img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/2.png">
 </center>
+<br>
+
 
 - #### 优化扩展封装
 
@@ -78,6 +80,8 @@ layout: web-crossplatform
 <center>
 <img width="80%" height="80%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/3.png">
 </center>
+<br>
+
 
 - #### 类 RN / Weex 框架功能模块
 
@@ -168,6 +172,8 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 <center>
 <img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/7.png">
 </center>
+<br>
+
 
 - #### 小程序在普通 App 中的未来
 
