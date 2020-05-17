@@ -65,7 +65,6 @@ layout: web-crossplatform
   - 对于跨平台一致的布局协议，前端已有成熟的 [Flexbox](https://www.w3schools.com/css/css3_flexbox.asp) 布局协议，同时对应  [Flexbox](https://www.w3schools.com/css/css3_flexbox.asp) 布局的开源 [Yoga](https://github.com/facebook/yoga) 引擎正好提供了跨平台的高效计算能力。
   - 在实际应用中的工程化建设和优化，从配置文件的更新和版本管理、到整合视图形成通用组件、可视化的预览平台，以及完整的监控上报等等。同时可以结合其它 Native 能力，形成完整的业务场景解决方案。
 
-  而对于跨平台一致的布局协议约定，在实际应用中的工程化建设和优化，从配置文件的更新和版本管理、到整合视图形成通用组件、可视化的预览平台，以及在整个链路中节点缓存、视图层级优化、事件处理优化和生命周期管理等等。
 
 其实以上，也就是目前流行的 DSL + Layout 动态化方案的整体实现。天猫的 [Tangram](http://tangram.pingguohe.net/)、美团的 [MTFlexbox](https://tech.meituan.com/2019/09/19/litho-practice-in-dynamic-program-mtflexbox.html) 和 [Picasso](https://tech.meituan.com/2018/06/21/picasso-the-future.html) 等等都是在此基础上进行的完善和封装。同时由于 [Flexbox](https://www.w3schools.com/css/css3_flexbox.asp) +  [Yoga](https://github.com/facebook/yoga) 的出现，这种技术方案甚至已经发展到了几乎每个小团队都有一个轮子的程度。
 
