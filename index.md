@@ -16,12 +16,11 @@ layout: index
 <br>
 
 ## - [HybridPageKit](https://github.com/dequan1331/HybridPageKit) 
-## - [WKWebViewExtension](https://github.com/dequan1331/WKWebViewExtension) 
-
 
 <br>
 <center> - 课程 - </center>
 ---
 <br>
 
-## - [极客时间-从0开发一款iOS应用](https://time.geekbang.org/course/intro/169) 
+## - [极客时间 - 从0开发一款iOS应用(课程)](https://time.geekbang.org/course/intro/169) 
+## - [极客时间 - 从0开发一款iOS应用(讲义)](https://github.com/dequan1331/geektime-ios-course) 
