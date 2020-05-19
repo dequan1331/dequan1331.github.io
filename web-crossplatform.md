@@ -84,27 +84,27 @@ layout: web-crossplatform
 
 - #### 类 RN / Weex 框架功能模块
 
-  在这类框架中，伴随着上文提到的主路径和扩展组件以及能力，一般就是由4个大的模块构成：`JS 引擎模块`提供分平台的 JS 执行能力，`Native 组件和能力`分别作为 Modules 模块和 Component 模块。而作为 JS 和 Native 之间的桥梁，在 `framework 模块`就提供了链接整个链路的功能和对外接口。具体的来说：
+  在这类框架中，伴随着上文提到的主路径和扩展组件以及能力，一般就是由4个大的模块构成：`JS 引擎模块`提供分平台的 JS 执行能力，`Native UI 组件和 非 UI 功能分别作为 Components 模块 和 Modules 模块。而作为 JS 和 Native 之间的桥梁，在 `framework 模块`就提供了链接整个链路的功能和对外接口。具体的来说：
 
   - JS 引擎模块一般使用 C++ 封装平台无关的 Wrapper 层，然后针对不同的平台，使用  [JSCore](https://developer.apple.com/documentation/javascriptcore)  或者 [V8](https://chromium.googlesource.com/v8/v8.git) 来实现 JS 的运行环境。 
   - 对于 UI 组件，一般由一个 Component 配合着对应的 View 来实现，其中 Component 提供了该组件对外的接口、属性等等。
-  - 而非 UI 的组件，一般称为 Modules 或者 Manager，常用的包括网络、导航、以及结合 Layout 处理 UI 布局的 UI Modules。
-  - 作为整体的流程的链接，在 Framework 模块提供执行 Javascript 的 Executor、Modules 和 Components 的注册管理 Register 、函数调用和数据通信的解析和转换 Method、以及供开发者使用的 Bridge 以及 RoootView 等等。
+  - 而非 UI 的功能封装，一般称为 Module 或者 Manager，常用的包括网络、导航、以及结合 Layout 处理 UI 布局的 UI Modules。
+  - 作为整体的流程的链接，在 Framework 模块提供执行 Javascript 的 Executor、Modules 和 Components 的注册管理 Register 逻辑、函数调用和数据通信的解析和转换 Method、以及供开发者使用的 Bridge 、 RoootView 等等。
 
 <center>
 <img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/4.png">
 </center>
 
-当然作为一个功能完备的框架，在这类框架中我们不光要关注整体功能的模块分布，其中 Javascript、布局、UI 等业务线程的管理、跨栈数据传递的优化、组件注册以及布局、更新逻辑，以及基于 JS 驱动异步布局的设计思想，都值得不断的学习和体会。
+当然作为一个功能完备的框架，在这类框架中我们不光要关注整体功能的模块分布，其中 Javascript、布局计算、UI 渲染等逻辑的线程管理、跨栈数据传递的优化、组件注册以及布局、更新逻辑，以及基于 JS 驱动异步布局的设计思想，都值得不断的学习和体会。
 
 ## 3.框架优化方向和工程实践
 
-随着这类技术方案的普及，各大公司和团队也都有了定制化的优化方案， 比如基于 RN 腾讯的 [Hippy](https://github.com/Tencent/Hippy)、携程的 [CRN](https://github.com/ctripcorp/CRN)，使用 TypeScript 实现的 [Titanium](https://github.com/appcelerator/titanium_mobile) 等等。同时相应的方案也被更上层的框架所内置，比如后文介绍的跨平台方案如 [chameleon](https://github.com/didi/chameleon) , [uni-app](https://github.com/dcloudio/uni-app) 等也都内置了 [Weex](https://github.com/apache/incubator-weex)  来实现 Native App 。
+随着这类技术方案的普及，各大公司和团队也都有了定制化的优化方案， 比如基于 RN 腾讯的 [Hippy](https://github.com/Tencent/Hippy)、携程的 [CRN](https://github.com/ctripcorp/CRN) 等等。同时相应的方案也被更上层的框架所内置，比如后文介绍的跨平台方案如 [chameleon](https://github.com/didi/chameleon) , [uni-app](https://github.com/dcloudio/uni-app) 等也都内置了 [Weex](https://github.com/apache/incubator-weex)  来实现 Native App 。
 
-整体上看，为了更好的和自身的历史逻辑和产品形态结合，不同的开发团队在保证核心链路的基础上，对整个框架方案的各个层面都进行了优化和扩展，结合上文提到的4个主要模块：
+整体上看，为了更好的和自身的历史逻辑和产品形态结合，不同的开发团队在保证核心链路的基础上，对整个框架方案的各个层面都进行了优化和扩展，比如从语言到渲染的完整链路：
 
 - 在`描述和语言层`，不断的扩展语言支持以及转换逻辑来兼容不同的前端历史代码。
-- 在 `Framework 框架层`，通过对 Widget 的深度优化，比如列表 Cell 复用、动画优化以及分包和自动化工具等等完成更多的场景覆盖。
+- 在 `Framework 框架层`，包括上文的 Components / Mudules 以及 Bridge等等，通过对 Widget 的深度优化，比如列表 Cell 复用、动画优化以及分包和自动化工具等等完成更多的场景覆盖。
 - 在 `VM 及引擎内核层`，使用定制的 JS 内核如 [X5](https://x5.tencent.com/)、封装 C++ 跨平台能力提高通用逻辑的性能；
 - 在`平台渲染层`，随着 [Flutter](https://github.com/flutter/flutter) 带来的高效渲染引擎 [Skia](https://github.com/google/skia)，各类框架也都纷纷尝试替换提供更加高效的一致性渲染。
 
@@ -112,7 +112,7 @@ layout: web-crossplatform
 <img width="60%" height="60%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/5.png">
 </center>
 
-同时与现有业务融合的工程化建设和方法论，也是近几年各大演讲分享的热门话题。从自动化构建打包集成、JS 文件的g检测、版本兼容以及离线资源发布，到各种工具链和脚手架、完善的 Debug 能力和可视化的发布平台。从各项性能指标的完整监控、统计和告警，到对历史业务和逻辑的重构经验。
+同时与现有业务融合的工程化建设和方法论，也是近几年各大演讲分享的热门话题。从自动化构建打包集成、JS 文件的 lint 检测、版本兼容以及离线资源发布，到各种工具链和脚手架、完善的 Debug 能力和可视化的发布平台；从各项性能指标的完整监控、统计和告警，到对历史业务和逻辑的重构经验等等。
 
 # <center>- Web 容器优化 -</center>
 
@@ -126,25 +126,25 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 
 - #### WebView 业务优化
 
-  客户端作为容器的提供者，常规的会从 WebView 的复用回收和预热、扩展安全的方法和接口封装、全面安全的 JSApi 设计管理等，来提升 Web 容器的加载速度、稳定性和易用性等，比如 [微信 JS-SDK](https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html) 的设计或 mPaas 中的 [H5容器和离线包](https://tech.antfin.com/docs/2/59192)。同时结合业务场景，扩展 Web 容器以页面、卡片、窗口浮层等多种展示手段和 Native 更紧密的结合；同时提供离线包和预加载功能或类似 [VasSonic](https://github.com/Tencent/VasSonic) 这样更侵入和激进的离线缓存机制；完整细致的监控平台保障稳定等等。
+  客户端作为容器的提供者，常规的会从 WebView 的复用回收和预热、扩展安全的方法和接口封装、全面安全的 JSApi 设计管理等，来提升 Web 容器的加载速度、稳定性和易用性等，比如 [微信 JS-SDK](https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html) 的设计或 mPaas 中的 [H5容器和离线包](https://tech.antfin.com/docs/2/59192)。同时结合业务场景，扩展 Web 容器以页面、卡片、窗口浮层等多种展示手段和 Native 更紧密的结合；在此基础上提供离线包和预加载功能或类似 [VasSonic](https://github.com/Tencent/VasSonic) 这样更侵入和激进的离线缓存机制；以及完整细致的监控平台保障稳定等等。
 
   
 
 - #### WebView 内核优化
 
-  而更进一步，我们可以通过更加底层的优化，提供定制化的浏览器的内核来满足业务场景。比如 [X5内核](https://x5.tencent.com/) 自定义的浏览器 Cache、内存管理、安全的连接等等；比如微信在发展到 [JS SDK](https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html) 之后就因为 Web 的各种瓶颈转而开始发展 [小程序](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0008aeea9a8978ab0086a685851c0a) ，进而实现了逻辑渲染分离、结合业务的同层渲染、更加安全的管控能力等等。
+  而更进一步，我们可以通过更加底层的优化，提供定制化的浏览器的内核来满足业务场景。比如 [X5内核](https://x5.tencent.com/) 自定义的浏览器 Cache、内存管理、安全的连接等等；比如微信在发展到 [JS-SDK](https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html) 之后就因为 Web 的各种瓶颈转而开始发展 [小程序](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0008aeea9a8978ab0086a685851c0a) ，进而实现了逻辑渲染分离、结合业务的同层渲染、更加安全的管控能力等等。
 
 <center>
 <img width="45%" height="45%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/6.png">
 </center>
 
-总的来说，客户端中的 Web 容器优化，就是围绕着 WebView，从自身加载性能、Native 能力和数据支持、对外接口安全扩展、离线包和丰富的 Native 展示场景等角度提供完整的优化方案。这其中并没有完整的通用框架支持，需要开发者整合多个优化点，围绕业务层面制定优化策略。
+总的来说，客户端中的 Web 容器优化，就是围绕着 WebView，从自身加载性能、Native 能力和数据支持、对外接口安全扩展、离线包和丰富的 Native 展示场景等角度提供完整的优化方案。这其中并没有完整的通用框架支持，需要开发者结合业务逻辑整合多个优化点，制定符合业务场景的优化策略。
 
 ## 2. 面向前端的 Web App
 
-当然以上都是从 App 开发者的视角进行的容器优化，而从前端的角度，如何使用 WebView 进行场景和功能实现，将 Web 内容迁移到移动设备上形成独立 App 才是对于他们的最优方案。所以无论是 [cordova](https://cordova.apache.org/)、 [PhoneGap](https://phonegap.com/)、[capacitor](https://capacitor.ionicframework.com/)，还是国内的 [Kerkee](https://github.com/kercer)、 [appcan](https://www.appcan.cn/)、 [WeX5](http://www.wex5.com/wex5/) 等等都是这一类的解决方案和开源框架。这些框架主要实现了 Native App 的基本框架、加载展示 Web 容器、最重要的就是解决 JS 和 Native 间的通信问题，封装Native 能力，支持 JS 使用 Native 的能力。
+以上都是从 App 开发者的视角进行的容器优化，而从前端的角度，如何将 Web 内容迁移到移动设备上形成独立 App 才是对于他们的最优方案。所以无论是 [cordova](https://cordova.apache.org/)、 [PhoneGap](https://phonegap.com/)、[capacitor](https://capacitor.ionicframework.com/)，还是国内的 [Kerkee](https://github.com/kercer)、 [appcan](https://www.appcan.cn/)、 [WeX5](http://www.wex5.com/wex5/) 等等都是这一类的解决方案和开源框架。这些框架主要实现了 Native App 的基本框架、加载展示 Web 容器、最重要的就是封装Native 能力，支持 JS 使用 Native 的能力和数据。
 
-随着 Apple 审核的愈加严格，这类 App 今后也面临着越来越大的压力。与上文提到的动态化布局和框架不同，无论是 WebView 容器的优化还是 Web App，这类方案不但使用 JS 引擎作为逻辑实现，同时还使用 WebView 作为渲染展示。而对于这类方案更加深入的优化，就不得不对提到小程序了。Web 页面通过 Web App 框架在操作系统上构建完整的 App，而通过小程序框架，在各自的平台里就构建出了小程序这样的功能形态。
+与上文提到的动态化布局和框架不同， WebView 容器的优化以及 Web App 框架的这类方案，虽然都是基于 Javascript ，使用 Javascript 引擎运行逻辑，但是他们使用 WebView 作为渲染展示而非映射成独立的 Naitve View。而对于这类方案更加深入的优化，就不得不对提到小程序了。Web 开发者通过 Web App 框架在操作系统上构建完整的 App，而通过小程序框架，在各自的平台里就构建出了小程序这样的功能形态。
 
 <center>
 <img width="45%" height="45%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/9.png">
@@ -166,7 +166,7 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 
   从产品形态来看，小程序的出现是流量寡头们为了自己的护城河，建立自有生态从而进行流量分发。所以目前各大超级 App 都纷纷入场推出自己的小程序平台。从这个角度讲，短时间内小程序很难有统一的标准或者协议，或者提供统一的接入方式，开发者必然会进入多平台小程序适配和开发的阶段。
 
-  小程序平台的不断碎片化也为业务开发者带来了负担。为了提升开发效率，目前业界大部分的开源项目也都集中在这个角度的优化和提效，比如一份代码生成多平台小程序框架 [Taro](https://taro.aotu.io/)、 [mpvue](https://github.com/Meituan-Dianping/mpvue) ；小程序和 Web 端的同构 [kbone](https://github.com/Tencent/kbone)、[alita](https://github.com/areslabs/alita)、[remax](https://github.com/remaxjs/remax) 等等。
+  小程序平台的不断碎片化也为业务开发者带来了负担。为了提升开发效率，目前业界大部分的开源项目也都集中在`“Write once, run anywhere”`这个角度的优化和提效，比如一份代码生成多平台小程序框架 [Taro](https://taro.aotu.io/)、 [mpvue](https://github.com/Meituan-Dianping/mpvue) ；小程序和 Web 端的同构 [kbone](https://github.com/Tencent/kbone)、[alita](https://github.com/areslabs/alita)、[remax](https://github.com/remaxjs/remax) 等等。
 
 <center>
 <img width="50%" height="50%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/7.png">
@@ -178,7 +178,7 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 
   未来普通 App 在提供小程序的同时，为了增加留存和用户时长，也需要打破信息壁垒扩展更多的第三方内容。同时为了尽可能的挖掘每一个用户，提供差异化的内容和服务满足长尾，App 或许会逐步的增加面向 A/B 实验或者特定人群的功能入口。
 
-  面对这种需求，传统的 SDK 接入或数据接口服务相较于小程序，在侵入性、平台相关性、动态扩展、移植性和开发效率上，都有极大的差距。如何生成自己的引擎提供能力，利用小程序的生态，让超级 App 平台的小程序能在我们的 App 中无缝运行，或许是一个不错的解决方案。目前小程序平台间的转换框架 [wwto](https://github.com/wuba/wwto) 在类似的场景有了一定的探索，相信未来在这个方向上会有更多的框架涌现出来，也会有更多的想象空间在等待着我们。
+  面对这种需求，传统的 SDK 接入或数据接口服务相较于小程序，在侵入性、平台相关性、动态扩展、移植性和开发效率上，都有极大的差距。如何生成自己的引擎提供能力，利用小程序的生态，让超级 App 平台的小程序能在我们的 App 中无缝运行，或许是一个不错的解决方案。目前小程序平台间的转换框架 [Taro](https://taro.aotu.io/)、 [wwto](https://github.com/wuba/wwto) 在类似的场景有了一定的探索，相信未来在这个方向上会有更多的框架涌现出来，也会有更多的想象空间在等待着我们。
 
 ## 2. 跨平台框架的演进
 
@@ -186,7 +186,7 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 
 - #### 一致性渲染
 
-  在渲染层面，Flutter 的到来才真正的抹平了平台差异化，提供了平台一致性的渲染引擎 [Skia](https://github.com/google/skia)。对于 Web 和 JS 技术栈的框架来说，不同平台差异的兼容、UI 组件布局和渲染效率的问题也终于有了解决的新思路。大部分类似的框架都开启了使用 [Skia](https://github.com/google/skia) 代替 iOS / Android 原声渲染的框架升级。当然对于 [Skia](https://github.com/google/skia) 自身来说，他们也在尝试使用 Metal 来替代 OpenGL 作为 iOS 的 backend 来进一步提升性能。
+  在渲染层面，Flutter 的到来才真正的抹平了平台差异化，提供了平台一致性的渲染引擎 [Skia](https://github.com/google/skia)。对于 Web 和 JS 技术栈的框架来说，不同平台差异的兼容、UI 组件布局和渲染效率的问题也终于有了解决的新思路。大部分类似的框架都开启了使用 [Skia](https://github.com/google/skia) 代替 iOS / Android 原声渲染的框架升级工作。当然为了更加极致的性能追求，底层依然是需要平台兼容和适配，比如对于 [Skia](https://github.com/google/skia) 自身来说，他们也在尝试使用 Metal 来替代 OpenGL 作为 iOS 的 backend 来进一步提升性能。
 
 - #### 编译转换
 
@@ -194,7 +194,7 @@ App 作为 WebView 容器和 Native 能力提供方，就需要对第三方提�
 
 - #### 新的底层平台 - 小程序
 
-  随着互联网流量的马太效应，超级 App 逐渐成为新的底层平台。开发者在面对 iOS / Android / Web 三个平台的基础上，又要不断的适配微信小程序、支付宝小程序、qq 小程序等等一众超级 App 平台。那么相应的基于 Javascript 的跨平台方案自然也就扩展到了更多平台的支持上。业界比如 [chameleon](https://github.com/didi/chameleon) , [uni-app](https://github.com/dcloudio/uni-app) 都是在这样的场景下催生的跨平台框架。
+  随着互联网流量的马太效应，超级 App 逐渐成为新的底层平台。开发者在面对 iOS / Android / Web 三个平台的基础上，又要不断的适配微信小程序、支付宝小程序、qq 小程序等等一众超级 App 平台。那么相应的基于 Javascript 的跨平台方案自然也就扩展到了更多平台的支持上，一套代码兼容浏览器、不同平台的小程序、兼容 RN / Weex 并由此构建 App 甚至是兼容转换 Dart 构建 Flutter 应用。业界比如 [chameleon](https://github.com/didi/chameleon) , [uni-app](https://github.com/dcloudio/uni-app) 都是在这样的场景下催生的跨平台框架。
 
 <center>
 <img width="40%" height="40%" src="https://raw.githubusercontent.com/dequan1331/dequan1331.github.io/master/assets/img/3/8.png">
